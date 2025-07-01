@@ -10,7 +10,9 @@ interface QuizPageProps {
 }
 
 export default async function QuizPage({ params }: QuizPageProps) {
-  const { id } = params;
+  // params 객체를 임시 변수에 할당한 후 id를 구조 분해 할당
+  const currentParams = params;
+  const { id } = currentParams;
 
   const quiz = await prisma.quiz.findUnique({
     where: { id },
@@ -26,7 +28,7 @@ export default async function QuizPage({ params }: QuizPageProps) {
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-3xl font-bold mb-6">{quiz.title}</h1>
-      <QuizSession quizData={quizData} />
+      <QuizSession initialQuizData={quizData} />
     </div>
   );
 }
