@@ -6,16 +6,18 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { UploadCloud, File as FileIcon, XCircle } from 'lucide-react';
 import { QuizData } from '@/lib/types';
-import QuizSession from '@/components/QuizSession'; // 잠시 후 생성할 컴포넌트
+import Link from 'next/link';
+import { useRouter } from 'next/navigation'; // useRouter 임포트
+import { toast } from 'react-hot-toast';
 
 type UploadStatus = 'idle' | 'uploading' | 'generating' | 'success' | 'error';
 
 export default function HomePage() {
+  const router = useRouter(); // useRouter 훅 사용
   const [file, setFile] = useState<File | null>(null);
   const [uploadStatus, setUploadStatus] = useState<UploadStatus>('idle');
   const [uploadProgress, setUploadProgress] = useState(0);
   const [errorMessage, setErrorMessage] = useState('');
-  const [generatedQuiz, setGeneratedQuiz] = useState<QuizData | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -36,8 +38,6 @@ export default function HomePage() {
     }
   };
 
-  // page.tsx 파일 안에 있는 handleFileUpload 함수를 아래 코드로 교체하세요.
-
   const handleFileUpload = async () => {
     if (!file) {
       setErrorMessage('파일을 선택해주세요.');
@@ -54,7 +54,6 @@ export default function HomePage() {
     const formData = new FormData();
     formData.append('file', file);
 
-    // ... (진행률 시뮬레이션 코드는 동일)
     let progress = 0;
     const interval = setInterval(() => {
       progress += 10;
@@ -74,37 +73,27 @@ export default function HomePage() {
       clearInterval(interval);
       setUploadProgress(100);
 
-      // ✅ [방어 코드] 응답이 정말 JSON인지 먼저 확인
       const contentType = response.headers.get('content-type');
       if (response.ok && contentType && contentType.includes('application/json')) {
         const data = await response.json();
-        setGeneratedQuiz(data.quizData);
-        setUploadStatus('success');
+        toast.success('퀴즈가 성공적으로 생성되어 저장되었습니다!');
+        router.push(`/quiz/${data.quizId}`); // 생성된 퀴즈 페이지로 리다이렉트
       } else {
-        // JSON이 아니라면, 에러 메시지를 텍스트로 읽어서 보여줌
         const textError = await response.text();
-        // HTML 태그는 사용자에게 보여줄 필요 없으므로 간단히 처리
         throw new Error(response.statusText || textError.substring(0, 100) || '알 수 없는 서버 오류');
       }
 
     } catch (error: any) {
       setUploadStatus('error');
-      // 에러 객체에 message가 있으면 그걸 쓰고, 없으면 그냥 문자열로 변환
       setErrorMessage(error.message || String(error));
+      toast.error(`퀴즈 생성 중 오류가 발생했습니다: ${error.message || String(error)}`);
     }
   };
 
-  const resetState = () => {
-    setFile(null);
-    setUploadStatus('idle');
-    setUploadProgress(0);
-    setErrorMessage('');
-    setGeneratedQuiz(null);
-  };
-
-  if (uploadStatus === 'success' && generatedQuiz) {
-    return <QuizSession initialQuizData={generatedQuiz} onReset={resetState} />;
-  }
+  // AI 퀴즈 생성 후 바로 리다이렉트되므로 이 부분은 더 이상 필요 없습니다.
+  // if (uploadStatus === 'success' && generatedQuiz) {
+  //   return <QuizSession initialQuizData={generatedQuiz} onReset={resetState} />;
+  // }
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-gray-50 p-4">
@@ -142,7 +131,16 @@ export default function HomePage() {
 
           {errorMessage && (<div className="mt-4 flex items-center text-red-600"><XCircle className="w-4 h-4 mr-2" /><p className="text-sm">{errorMessage}</p></div>)}
 
-          <div className="mt-6 flex justify-center"><Button onClick={handleFileUpload} disabled={!file || uploadStatus === 'uploading' || uploadStatus === 'generating'} className="w-full">퀴즈 생성하기</Button></div>
+          <div className="mt-6 flex justify-center">
+            <Button onClick={handleFileUpload} disabled={!file || uploadStatus === 'uploading' || uploadStatus === 'generating'} className="w-full">
+              퀴즈 생성하기
+            </Button>
+          </div>
+          <div className="mt-4 text-center">
+            <Link href="/my-quizzes">
+              <Button variant="link">내 퀴즈 관리하기</Button>
+            </Link>
+          </div>
         </CardContent>
       </Card>
     </main>

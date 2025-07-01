@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-// 🔄 pdf-parse 삭제
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { QuizData } from "@/lib/types";
+import prisma from "@/lib/prisma"; // Prisma 클라이언트 임포트
 
 export const runtime = "nodejs";
 export const preferredRegion = "iad1";
@@ -21,9 +21,9 @@ export async function POST(req: NextRequest) {
                 { status: 400 },
             );
         // 🔄 20 MB 한도로 상향
-        if (file.size > 20 * 1024 * 1024)
+        if (file.size > 15 * 1024 * 1024)
             return NextResponse.json(
-                { error: "파일 크기는 20 MB를 초과할 수 없습니다." },
+                { error: "파일 크기는 15 MB를 초과할 수 없습니다." },
                 { status: 400 },
             );
 
@@ -37,19 +37,16 @@ export async function POST(req: NextRequest) {
         const prompt = `
    다음 텍스트를 기반으로 중요한 내용을 학습할 수 있는 퀴즈를 생성해줘.
       - 각 질문은 "question" 필드에, 정답은 "answer" 필드에 포함해야 해.
-      - 객관식 문제의 경우, 4개의 보기를 "options" 필드에 배열 형태로 포함하고, 정답은 보기 내용과 정확히 일치하는 텍스트로 "answer"에 넣어줘.
-      - 주관식 문제도 몇 개 포함해줘. 주관식 문제는 "options" 필드가 없어야 해.
       - 전체 퀴즈를 주제별로 1개 이상의 카테고리로 묶어줘.
       - 최종 결과는 반드시 아래와 같은 JSON 형식으로만 응답해야 하며, 그 외의 설명이나 부가 텍스트는 절대 포함하면 안 돼.
-      - 생성할 퀴즈의 총 개수는 5개에서 10개 사이로 해줘.
+      - 생성할 퀴즈의 총 개수는 최대한 많이 빠지는 내용 없이 해줘.
 
       [JSON 형식 예시]
       {
         "카테고리 이름 1": [
           {
             "question": "문제 내용...",
-            "options": ["보기 1", "보기 2", "보기 3", "보기 4"],
-            "answer": "보기 2"
+            "answer": "답"
           }
         ]
       }
@@ -80,7 +77,16 @@ export async function POST(req: NextRequest) {
         if (!Object.keys(quizData).length)
             throw new Error("Generated quiz data is empty.");
 
-        return NextResponse.json({ quizData });
+        // ✅ AI가 생성한 퀴즈를 데이터베이스에 저장
+        const newQuiz = await prisma.quiz.create({
+            data: {
+                title: file.name.replace(".pdf", "") + " 퀴즈", // 파일 이름을 기반으로 제목 생성
+                quizData: quizData, // JSON 형식으로 저장
+                isShared: false, // 기본적으로 비공개
+            },
+        });
+
+        return NextResponse.json({ quizData, quizId: newQuiz.id }); // 새로 생성된 퀴즈 ID 반환
     } catch (err: any) {
         console.error("Error in generate-quiz API:", err);
         return NextResponse.json(
