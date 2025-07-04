@@ -6,17 +6,21 @@ import { Quiz } from '@prisma/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'react-hot-toast';
+import { Input } from '@/components/ui/input'; // Input 컴포넌트 임포트
 
 export default function SharedQuizzesPage() {
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState(''); // 검색어 상태 추가
 
   useEffect(() => {
     const fetchSharedQuizzes = async () => {
       try {
         setLoading(true);
-        const response = await fetch('/api/quizzes/shared');
+        // 검색어가 있으면 쿼리 파라미터로 추가
+        const url = searchTerm ? `/api/quizzes/shared?search=${encodeURIComponent(searchTerm)}` : '/api/quizzes/shared';
+        const response = await fetch(url);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -30,8 +34,15 @@ export default function SharedQuizzesPage() {
       }
     };
 
-    fetchSharedQuizzes();
-  }, []);
+    // 검색어가 변경될 때마다 API 호출
+    const handler = setTimeout(() => {
+      fetchSharedQuizzes();
+    }, 500); // 디바운싱을 위해 0.5초 지연
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [searchTerm]); // searchTerm이 변경될 때마다 useEffect 실행
 
   if (loading) return <div className="container mx-auto p-4">로딩 중...</div>;
   if (error) return <div className="container mx-auto p-4 text-red-500">오류: {error}</div>;
@@ -39,6 +50,15 @@ export default function SharedQuizzesPage() {
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-3xl font-bold mb-6">공유된 퀴즈</h1>
+      <div className="mb-4">
+        <Input
+          type="text"
+          placeholder="퀴즈 제목으로 검색..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full max-w-md"
+        />
+      </div>
       {quizzes.length === 0 ? (
         <p>아직 공유된 퀴즈가 없습니다.</p>
       ) : (
