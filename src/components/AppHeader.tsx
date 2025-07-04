@@ -59,7 +59,8 @@ export default function AppHeader() {
                         </div>
 
                         <span className="font-bold text-lg text-gray-900 hidden sm:inline">
-                            PDF<span className="text-purple-700">Quiz</span>
+                            <span className="text-purple-600">Quiz</span>
+                            <span className="text-pink-500">Pick</span>
                         </span>
                     </Link>
 
