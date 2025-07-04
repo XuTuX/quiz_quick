@@ -84,9 +84,9 @@ export default function QuizSession({
 
     const handleSelectCategory = (category: string | null) => {
         if (category) {
-            setQuestions(initialQuizData[category]);
+            setQuestions([...initialQuizData[category]]);
         } else {
-            setQuestions(allQuestions);
+            setQuestions([...allQuestions]);
         }
         setSelectedCategory(category);
         setCurrentQuestionIndex(0);
