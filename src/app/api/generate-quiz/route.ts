@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { QuizData } from "@/lib/types";
 import prisma from "@/lib/prisma"; // Prisma 클라이언트 임포트
+import { getAuth } from "@clerk/nextjs/server"; // Clerk getAuth 임포트
 
 export const runtime = "nodejs";
 export const preferredRegion = "iad1";
@@ -10,6 +11,13 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
 export async function POST(req: NextRequest) {
     try {
+        const { userId } = getAuth(req); // 현재 로그인한 사용자 ID 가져오기
+        console.log("API Route userId:", userId); // 디버깅을 위한 로그 추가
+
+        if (!userId) {
+            return new NextResponse("Unauthorized", { status: 401 });
+        }
+
         const formData = await req.formData();
         const file = formData.get("file") as File | null;
 
@@ -83,6 +91,7 @@ export async function POST(req: NextRequest) {
                 title: file.name.replace(".pdf", "") + " 퀴즈", // 파일 이름을 기반으로 제목 생성
                 quizData: quizData, // JSON 형식으로 저장
                 isShared: false, // 기본적으로 비공개
+                userId: userId, // userId 추가
             },
         });
 

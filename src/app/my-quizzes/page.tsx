@@ -80,7 +80,7 @@ export default function MyQuizzesPage() {
     <div className="container mx-auto p-4">
       <h1 className="text-3xl font-bold mb-6">내 퀴즈</h1>
       <div className="mb-6">
-        <Link href="/">
+        <Link href="/create-quiz">
           <Button>새 퀴즈 만들기</Button>
         </Link>
       </div>

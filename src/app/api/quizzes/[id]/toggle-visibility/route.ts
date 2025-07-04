@@ -1,11 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { getAuth } from "@clerk/nextjs/server"; // Clerk getAuth 임포트
 
 export async function PATCH(
     req: NextRequest,
     { params }: { params: { id: string } },
 ) {
     try {
+        const { userId } = getAuth(req);
+
+        if (!userId) {
+            return new NextResponse("Unauthorized", { status: 401 });
+        }
+
         const { id } = params;
         const { isShared }: { isShared: boolean } = await req.json();
 
@@ -13,14 +20,22 @@ export async function PATCH(
             return NextResponse.json({ error: "isShared 값은 boolean이어야 합니다." }, { status: 400 });
         }
 
+        const quiz = await prisma.quiz.findUnique({
+            where: { id },
+        });
+
+        if (!quiz) {
+            return NextResponse.json({ error: "퀴즈를 찾을 수 없습니다." }, { status: 404 });
+        }
+
+        if (quiz.userId !== userId) {
+            return new NextResponse("Forbidden", { status: 403 });
+        }
+
         const updatedQuiz = await prisma.quiz.update({
             where: { id },
             data: { isShared },
         });
-
-        if (!updatedQuiz) {
-            return NextResponse.json({ error: "퀴즈를 찾을 수 없습니다." }, { status: 404 });
-        }
 
         return NextResponse.json({ quiz: updatedQuiz });
     } catch (error: any) {

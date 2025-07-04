@@ -1,9 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { QuizData } from "@/lib/types";
+import { auth } from "@clerk/nextjs";
 
 export async function POST(req: NextRequest) {
     try {
+        const { userId } = auth();
+
+        if (!userId) {
+            return new NextResponse("Unauthorized", { status: 401 });
+        }
+
         const { title, quizData }: { title: string; quizData: QuizData } = await req.json();
 
         if (!title || !quizData) {
@@ -15,6 +22,7 @@ export async function POST(req: NextRequest) {
                 title,
                 quizData,
                 isShared: false, // 기본적으로 비공개
+                userId: userId, // Add userId here
             },
         });
 

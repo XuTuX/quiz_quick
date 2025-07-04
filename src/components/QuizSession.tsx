@@ -50,6 +50,13 @@ export default function QuizSession({
         Record<number, UserAnswer>
     >({});
 
+    // ⬇️ 컴포넌트 마운트 시 초기 문제 세트 설정
+    useEffect(() => {
+        if (!selectedCategory && allQuestions.length > 0) {
+            setQuestions(allQuestions);
+        }
+    }, [allQuestions, selectedCategory]);
+
     /* ------------------------------------------------------------------ */
     /*  2. 헬퍼                                                           */
     /* ------------------------------------------------------------------ */

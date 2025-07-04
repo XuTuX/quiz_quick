@@ -7,7 +7,11 @@ export interface QA {
     isCorrect?: boolean; // 정답 여부
 }
 
-// AI가 생성할 전체 퀴즈 데이터 구조 (카테고리별로 그룹화)
-export interface QuizData {
-    [category: string]: QA[];
-}
+// 퀴즈 카테고리 구조
+export type QuizItem = { question: string; answer: string };
+
+export type QuizData = Record<
+    string,
+    ReadonlyArray<QuizItem>  // 🔄 배열 앞에 ReadonlyArray<>
+>;
+

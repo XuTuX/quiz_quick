@@ -3,8 +3,22 @@ import prisma from "@/lib/prisma";
 
 export async function GET(req: NextRequest) {
     try {
+        const { searchParams } = new URL(req.url);
+        const query = searchParams.get("query"); // 'query' 파라미터로 검색어 가져오기
+
+        const whereClause: { isShared: boolean; title?: { contains: string; mode: "insensitive" } } = {
+            isShared: true,
+        };
+
+        if (query) {
+            whereClause.title = {
+                contains: query,
+                mode: "insensitive", // 대소문자 구분 없이 검색
+            };
+        }
+
         const sharedQuizzes = await prisma.quiz.findMany({
-            where: { isShared: true },
+            where: whereClause,
         });
         return NextResponse.json({ quizzes: sharedQuizzes });
     } catch (error: any) {

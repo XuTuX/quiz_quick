@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -15,6 +15,7 @@ model Quiz {
   title     String
   quizData  Json
   isShared  Boolean  @default(false)
+  userId    String // Add this line
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

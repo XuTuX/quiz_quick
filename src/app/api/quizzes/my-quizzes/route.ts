@@ -1,9 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { getAuth } from "@clerk/nextjs/server"; // getAuth 임포트
 
 export async function GET(req: NextRequest) {
     try {
-        const quizzes = await prisma.quiz.findMany();
+        const { userId } = getAuth(req);
+
+        if (!userId) {
+            return new NextResponse("Unauthorized", { status: 401 });
+        }
+
+        const quizzes = await prisma.quiz.findMany({
+            where: { userId: userId },
+        });
         return NextResponse.json({ quizzes });
     } catch (error: any) {
         console.error("Error fetching my quizzes:", error);
