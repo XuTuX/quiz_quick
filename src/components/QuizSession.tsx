@@ -30,13 +30,16 @@ export default function QuizSession({
     /* ------------------------------------------------------------------ */
     /*  1. 상태                                                           */
     /* ------------------------------------------------------------------ */
+    const [categories] = useState(Object.keys(initialQuizData));
+    const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+
     // (1) 절대 변하지 않는 전체 문제 리스트
     const [allQuestions] = useState<QA[]>(() =>
         Object.values(initialQuizData).flat(),
     );
 
     // (2) 현재 학습 중인 문제 세트 (오답 재도전 시 교체됨)
-    const [questions, setQuestions] = useState<QA[]>(allQuestions);
+    const [questions, setQuestions] = useState<QA[]>([]);
 
     const [quizPhase, setQuizPhase] = useState<QuizPhase>('learn');
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -72,6 +75,19 @@ export default function QuizSession({
         }
     };
 
+    const handleSelectCategory = (category: string | null) => {
+        if (category) {
+            setQuestions(initialQuizData[category]);
+        } else {
+            setQuestions(allQuestions);
+        }
+        setSelectedCategory(category);
+        setCurrentQuestionIndex(0);
+        setUserAnswers({});
+        setShowAnswer(false);
+        setQuizPhase('learn');
+    };
+
     // ⬇️ 오답만 모아서 재도전
     const retryWrongQuestions = () => {
         const wrong = allQuestions.filter(
@@ -79,6 +95,7 @@ export default function QuizSession({
         );
         if (wrong.length) {
             setQuestions(wrong);
+            setSelectedCategory("오답 노트"); // 오답노트 카테고리 지정
             setCurrentQuestionIndex(0);
             setUserAnswers({});
             setShowAnswer(false);
@@ -148,14 +165,53 @@ export default function QuizSession({
                                 </Button>
                             )}
                             <Button
-                                onClick={onReset || (() => router.push('/'))}
+                                onClick={() => setSelectedCategory(null)} // 카테고리 선택으로 돌아가기
                                 variant="outline"
                                 className="flex-1"
                             >
                                 <Home className="mr-2 h-4 w-4" />
-                                처음으로
+                                카테고리 선택
                             </Button>
                         </div>
+                    </CardContent>
+                </Card>
+            </main>
+        );
+    }
+
+    /* ------------------------------------------------------------------ */
+    /*  5. 카테고리 선택 화면                                             */
+    /* ------------------------------------------------------------------ */
+    if (!selectedCategory) {
+        return (
+            <main className="flex min-h-screen flex-col items-center justify-center bg-gray-50 p-4">
+                <Card className="w-full max-w-2xl">
+                    <CardHeader>
+                        <CardTitle className="text-2xl font-bold text-center">학습할 카테고리 선택</CardTitle>
+                    </CardHeader>
+                    <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {categories.map((cat) => (
+                            <Button
+                                key={cat}
+                                onClick={() => handleSelectCategory(cat)}
+                                className="h-16 text-lg justify-between"
+                                variant="outline"
+                            >
+                                <span>{cat}</span>
+                                <span className="text-sm font-normal bg-gray-200 px-2 py-1 rounded">
+                                    {initialQuizData[cat].length} 문제
+                                </span>
+                            </Button>
+                        ))}
+                        <Button
+                            onClick={() => handleSelectCategory(null)} // 전체 문제 선택
+                            className="h-16 text-lg justify-between md:col-span-2 bg-blue-500 hover:bg-blue-600 text-white"
+                        >
+                            <span>전체 문제 풀기</span>
+                            <span className="text-sm font-normal bg-blue-400 px-2 py-1 rounded">
+                                {allQuestions.length} 문제
+                            </span>
+                        </Button>
                     </CardContent>
                 </Card>
             </main>
@@ -170,7 +226,7 @@ export default function QuizSession({
             <Card className="w-full max-w-2xl">
                 <CardHeader>
                     <div className="flex justify-between items-center">
-                        <CardTitle>AI 생성 퀴즈</CardTitle>
+                        <CardTitle>{selectedCategory === '오답 노트' ? '오답 다시 풀기' : selectedCategory || '전체 퀴즈'}</CardTitle>
                         <span className="text-sm text-muted-foreground">
                             문제 {currentQuestionIndex + 1} / {questions.length}
                         </span>
@@ -190,10 +246,10 @@ export default function QuizSession({
                 <CardFooter className="flex justify-between items-center">
                     <Button
                         variant="ghost"
-                        onClick={onReset || (() => router.push('/'))}
+                        onClick={() => setSelectedCategory(null)} // 카테고리 선택으로 돌아가기
                     >
                         <Home className="mr-2 h-4 w-4" />
-                        처음으로
+                        카테고리 선택
                     </Button>
 
                     <div className="flex gap-4">
