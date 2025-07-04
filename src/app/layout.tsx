@@ -3,9 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
 import { ClerkProvider } from "@clerk/nextjs";
-import { Toaster } from "react-hot-toast";
-
-import Sidebar from "@/components/Sidebar";
+import { Toaster } from "react-hot-toast"
 import AppHeader from "@/components/AppHeader";   // ← 새로 추가한 헤더
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
@@ -21,8 +19,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <ClerkProvider>
       <html lang="ko">
         <body className={`${geistSans.variable} ${geistMono.variable} antialiased flex h-screen`}>
-          {/* ===== 사이드바 (md 이상) ===== */}
-          <Sidebar />
+
 
           {/* ===== 메인 영역 ===== */}
           <div className="flex flex-col flex-1 bg-gradient-to-br from-blue-50 to-purple-50/20">
