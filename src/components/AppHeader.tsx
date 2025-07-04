@@ -110,6 +110,14 @@ export default function AppHeader() {
                                         <Plus className="h-4 w-4 mr-1" /> 새 퀴즈
                                     </Link>
                                 </Button>
+                                <Button
+                                    asChild
+                                    className="rounded-xl bg-gray-200 hover:bg-gray-300 focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 text-gray-800 px-4 h-10 font-medium"
+                                >
+                                    <Link href="/my-quizzes">
+                                        나의 페이지
+                                    </Link>
+                                </Button>
                                 <UserButton afterSignOutUrl="/" />
                             </>
                         </SignedIn>
