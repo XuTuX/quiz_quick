@@ -145,8 +145,9 @@ export default function QuizSession({
     /* ------------------------------------------------------------------ */
     if (quizPhase === 'done') {
         const correct = Object.values(userAnswers).filter((a) => a.knewIt).length;
-        const total = allQuestions.length; // 항상 원본 기준
+        const total = questions.length; // 현재 카테고리(또는 오답노트) 기준
         const wrong = total - correct;
+        const score = total > 0 ? Math.round((correct / total) * 100) : 0; // 점수 계산
 
         return (
             <main className="flex min-h-screen flex-col items-center justify-center bg-gray-50 p-4">
@@ -164,6 +165,9 @@ export default function QuizSession({
                                 틀린 문제: <span className="font-bold text-red-600">{wrong}개</span>
                             </p>
                         )}
+                        <p className="text-2xl font-bold mt-4">
+                            점수: <span className="text-purple-600">{score}점</span>
+                        </p>
                         <div className="mt-6 flex flex-col sm:flex-row gap-4 justify-center">
                             {wrong > 0 && (
                                 <Button onClick={retryWrongQuestions} className="flex-1">
