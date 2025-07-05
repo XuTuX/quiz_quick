@@ -1,43 +1,74 @@
-// src/app/quiz/[id]/page.tsx
-// Next.js 15 이상용 ― params Promise 대응 완료
 
-import { notFound } from 'next/navigation';
-import prisma from '@/lib/prisma';
-import QuizSession from '@/components/QuizSession';
-import { QuizData } from '@/lib/types';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import prisma from "@/lib/prisma";
+import { notFound } from "next/navigation";
 
-/** 동적 라우트 매개변수 타입 */
-type Params = { id: string };
+export default async function QuizCategorySelectPage({
+  params,
+}: {
+  params: { id: string };
+}) {
+  const quiz = await prisma.quiz.findUnique({
+    where: { id: params.id },
+    select: {
+      title: true,
+      quizData: true,
+    },
+  });
 
-interface QuizPageProps {
-  /** Next 15부터 Promise 로 전달됨 */
-  params: Promise<Params>;
-}
+  if (!quiz) {
+    notFound();
+  }
 
-/**
- * 퀴즈 상세 페이지
- * - URL  : /quiz/[id]
- * - 역할 : DB에서 퀴즈 불러와 <QuizSession>에 전달
- */
-export default async function QuizPage({ params }: QuizPageProps) {
-  // 1. Promise 해제 후 id 추출
-  const { id } = await params;
+  const quizData = quiz.quizData as Record<string, any[]>;
+  const categories = Object.keys(quizData);
+  const allQuestionsCount = categories.reduce(
+    (acc, cat) => acc + quizData[cat].length,
+    0
+  );
 
-  // 2. 유효성 검사
-  if (!id) notFound();
-
-  // 3. DB 조회
-  const quiz = await prisma.quiz.findUnique({ where: { id } });
-  if (!quiz) notFound();
-
-  // 4. JSON → 타입 단언
-  const quizData = quiz.quizData as unknown as QuizData;
-
-  // 5. 렌더링
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-6">{quiz.title}</h1>
-      <QuizSession initialQuizData={quizData} />
-    </div>
+    <main className="flex min-h-screen flex-col items-center justify-center bg-gray-50 p-4">
+      <Card className="w-full max-w-2xl">
+        <CardHeader>
+          <CardTitle className="text-2xl font-bold text-center">
+            {quiz.title}
+          </CardTitle>
+          <p className="text-center text-muted-foreground">
+            학습할 카테고리를 선택하세요.
+          </p>
+        </CardHeader>
+        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {categories.map((cat) => (
+            <Button
+              key={cat}
+              asChild
+              className="h-16 text-lg justify-between"
+              variant="outline"
+            >
+              <Link href={`/quiz/${params.id}/${encodeURIComponent(cat)}`}>
+                <span>{cat}</span>
+                <span className="text-sm font-normal bg-gray-200 px-2 py-1 rounded">
+                  {quizData[cat].length} 문제
+                </span>
+              </Link>
+            </Button>
+          ))}
+          <Button
+            asChild
+            className="h-16 text-lg justify-between md:col-span-2 bg-blue-500 hover:bg-blue-600 text-white"
+          >
+            <Link href={`/quiz/${params.id}/all`}>
+              <span>전체 문제 풀기</span>
+              <span className="text-sm font-normal bg-blue-400 px-2 py-1 rounded">
+                {allQuestionsCount} 문제
+              </span>
+            </Link>
+          </Button>
+        </CardContent>
+      </Card>
+    </main>
   );
 }
