@@ -8,6 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'react-hot-toast';
 
+import { Badge } from "@/components/ui/badge";
+
 function SharedQuizzesContent() {
   const searchParams = useSearchParams();
   const query = searchParams.get('q') || '';
@@ -59,6 +61,17 @@ function SharedQuizzesContent() {
               </CardHeader>
               <CardContent>
                 <p>이 퀴즈는 공유되어 있습니다.</p>
+                {quiz.hashtags && quiz.hashtags.length > 0 && (
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {quiz.hashtags.map((tag, index) => (
+                      <Link key={index} href={`/shared-quizzes?q=${encodeURIComponent(tag)}`}>
+                        <Badge variant="secondary" className="cursor-pointer hover:bg-gray-200">
+                          {tag}
+                        </Badge>
+                      </Link>
+                    ))}
+                  </div>
+                )}
               </CardContent>
               <CardFooter>
                 <Link href={`/quiz/${quiz.id}`}>

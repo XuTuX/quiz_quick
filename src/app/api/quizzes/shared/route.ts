@@ -6,15 +6,25 @@ export async function GET(req: NextRequest) {
         const { searchParams } = new URL(req.url);
         const query = searchParams.get("q"); // 'q' 파라미터로 검색어 가져오기
 
-        const whereClause: { isShared: boolean; title?: { contains: string; mode: "insensitive" } } = {
+        const whereClause: any = {
             isShared: true,
         };
 
         if (query) {
-            whereClause.title = {
-                contains: query,
-                mode: "insensitive", // 대소문자 구분 없이 검색
-            };
+            const normalizedQuery = query.normalize('NFC');
+            whereClause.OR = [
+                {
+                    title: {
+                        contains: normalizedQuery,
+                        mode: "insensitive",
+                    },
+                },
+                {
+                    hashtags: {
+                        has: normalizedQuery, // 배열 필드 검색
+                    },
+                },
+            ];
         }
 
         const sharedQuizzes = await prisma.quiz.findMany({

@@ -43,21 +43,47 @@ export async function POST(req: NextRequest) {
         });
 
         const prompt = `
-   다음 텍스트를 기반으로 중요한 내용을 학습할 수 있는 퀴즈를 생성해줘.
-      - 각 질문은 "question" 필드에, 정답은 "answer" 필드에 포함해야 해.
-      - 전체 퀴즈를 주제별로 1개 이상의 카테고리로 묶어줘.
-      - 최종 결과는 반드시 아래와 같은 JSON 형식으로만 응답해야 하며, 그 외의 설명이나 부가 텍스트는 절대 포함하면 안 돼.
-      - 생성할 퀴즈의 총 개수는 최대한 많이 빠지는 내용 없이 해줘.
+  너는 제공된 텍스트를 기반으로 학습용 퀴즈를 최대한 상세히 만들어야 한다.
 
-      [JSON 형식 예시]
-      {
-        "카테고리 이름 1": [
-          {
-            "question": "문제 내용...",
-            "answer": "답"
-          }
-        ]
-      }
+조건:
+1. 퀴즈는 중요한 내용을 빠짐없이 포함하며, 문서의 핵심 개념과 세부 내용까지 반영한다.
+2. 전체 퀴즈 수는 가능한 한 많게 작성한다.
+3. 질문은 "question" 필드에, 정답은 "answer" 필드에 담는다.
+4. 질문은 반드시 **하나의 정답**만 가지며, 주관식(단답형 또는 완성형)으로 작성한다.
+5. 같은 개념이라도 질문 문장이 완전히 동일하지 않도록 한다.
+6. 질문 유형은 용어 정의형, 빈칸 완성형, 원인·결과형 등 다양하게 만든다.
+7. 정답은 문장형이 아니라 핵심 단어/구절로만 작성한다.
+8. 전체 퀴즈를 1개 이상의 카테고리(장·절·목차 등)에 따라 구조화한다.
+9. 카테고리 내 문제는 원문 흐름(목차 순서)에 맞춰 정렬한다.
+10. **출력 형식**:  
+    - JSON 외의 다른 텍스트, 설명, 인사말은 절대 포함하지 않는다.  
+    - 최상위에 title(퀴즈 제목)과 hashtags(주제를 나타내는 해시태그 3개 배열)를 포함한다.  
+    - 이후 각 카테고리 이름을 키로 하여 문제 배열을 넣는다.
+11. 출력 JSON은 UTF-8 인코딩을 가정한다.
+
+[출력 JSON 형식 예시]
+{
+  "title": "퀴즈 제목",
+  "hashtags": ["#해시태그1", "#해시태그2", "#해시태그3"],
+  "카테고리 이름 1": [
+    {
+      "question": "문제 내용...",
+      "answer": "정답"
+    },
+    {
+      "question": "문제 내용...",
+      "answer": "정답"
+    }
+  ],
+  "카테고리 이름 2": [
+    {
+      "question": "문제 내용...",
+      "answer": "정답"
+    }
+  ]
+}
+
+위 조건을 모두 지켜 퀴즈를 생성하라.
 
 `;
 
@@ -81,17 +107,20 @@ export async function POST(req: NextRequest) {
                 { status: 500 },
             );
 
-        const quizData: QuizData = JSON.parse(match[1] || match[2]);
-        if (!Object.keys(quizData).length)
+        const quizData: QuizData & { title: string; hashtags: string[] } = JSON.parse(match[1] || match[2]);
+        if (!Object.keys(quizData).length) // quizData 객체에 카테고리가 있는지 확인
             throw new Error("Generated quiz data is empty.");
+
+        const { title, hashtags, ...categories } = quizData;
 
         // ✅ AI가 생성한 퀴즈를 데이터베이스에 저장
         const newQuiz = await prisma.quiz.create({
             data: {
-                title: (file.name.replace(".pdf", "") + " 퀴즈").normalize('NFC'), // 파일 이름을 기반으로 제목 생성 및 NFC 정규화
-                quizData: quizData, // JSON 형식으로 저장
+                title: title.normalize('NFC'), // AI가 생성한 제목 사용 및 NFC 정규화
+                quizData: categories, // 카테고리만 저장
                 isShared: false, // 기본적으로 비공개
                 userId: userId, // userId 추가
+                hashtags: hashtags, // 해시태그 추가
             },
         });
 

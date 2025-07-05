@@ -15,7 +15,8 @@ model Quiz {
   title     String
   quizData  Json
   isShared  Boolean  @default(false)
-  userId    String // Add this line
+  userId    String
+  hashtags  String[] @default([])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
