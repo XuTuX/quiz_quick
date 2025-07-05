@@ -1,6 +1,4 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
+// prisma/schema.prisma
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,12 +9,26 @@ datasource db {
 }
 
 model Quiz {
+  id         String   @id @default(cuid())
+  title      String
+  quizData   Json
+  isShared   Boolean  @default(false)
+  userId     String
+  hashtags   String[] @default([])   // <-- 이전 그대로
+  totalLikes Int      @default(0)    // 👍 카운트 캐싱
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  likes      Like[]                 // 1:N 관계
+}
+
+model Like {
   id        String   @id @default(cuid())
-  title     String
-  quizData  Json
-  isShared  Boolean  @default(false)
-  userId    String
-  hashtags  String[] @default([])
+  quizId    String
+  quiz      Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  userId    String              // Clerk userId 그대로 저장
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+
+  @@unique([quizId, userId])    // 중복 좋아요 방지
+  @@index([userId])             // “내가 누른 좋아요” 빠른 조회
 }
