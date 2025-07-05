@@ -61,30 +61,30 @@ export default function QuizPage() {
 
     const handleShowAnswer = () => setShowAnswer(true);
 
-    const handleSelfAssess = (knewIt: boolean) => {
-        setUserAnswers(prev => ({ ...prev, [currentQuestionIndex]: { knewIt } }));
-        goToNextQuestion();
+    const goToNextQuestion = () => {
+        setCurrentQuestionIndex(prev => prev + 1);
+        setShowAnswer(false);
     };
 
-    const goToNextQuestion = () => {
+    const handleSelfAssess = (knewIt: boolean) => {
+        const updatedAnswers = { ...userAnswers, [currentQuestionIndex]: { knewIt } };
+        setUserAnswers(updatedAnswers);
+
         if (currentQuestionIndex < questions.length - 1) {
-            setCurrentQuestionIndex(prev => prev + 1);
-            setShowAnswer(false);
+            goToNextQuestion();
         } else {
-            // 마지막 문제 후 결과 계산
-            const finalAnswers = { ...userAnswers, [currentQuestionIndex]: userAnswers[currentQuestionIndex] || { knewIt: false } };
-            const correctAnswers = Object.values(finalAnswers).filter(a => a.knewIt).length;
+            // 마지막 문제입니다. 여기서 퀴즈를 종료하고 결과를 처리합니다.
+            const correctAnswers = Object.values(updatedAnswers).filter(a => a.knewIt).length;
             
             const results = {
                 total: questions.length,
                 correct: correctAnswers,
-                answers: finalAnswers,
-                questions: questions, // 현재 문제 세트 전달
+                answers: updatedAnswers,
+                questions: questions,
             };
 
             localStorage.setItem('quizResults', JSON.stringify(results));
             
-            // 재시도 세션이었다면, 사용된 재시도 데이터를 정리합니다.
             if (category === 'retry') {
                 localStorage.removeItem('retryQuizQuestions');
             }
