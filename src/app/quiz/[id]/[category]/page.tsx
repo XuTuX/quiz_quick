@@ -100,6 +100,7 @@ export default function QuizPage() {
         } else {
             if (e.key === ' ' || e.key === 'Enter') {
                 e.preventDefault();
+                e.stopPropagation(); // 이벤트 전파를 막아 의도치 않은 클릭 방지
                 handleShowAnswer();
             }
         }
