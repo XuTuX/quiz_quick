@@ -14,6 +14,7 @@ function SharedQuizzesContent() {
   const searchParams = useSearchParams();
   const query = searchParams.get('q') || '';
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
+  const [allHashtags, setAllHashtags] = useState<string[]>([]); // 모든 해시태그 상태 추가
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -36,7 +37,22 @@ function SharedQuizzesContent() {
       }
     };
 
+    const fetchHashtags = async () => {
+      try {
+        const response = await fetch('/api/hashtags');
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        setAllHashtags(data.hashtags);
+      } catch (err: any) {
+        console.error("Failed to fetch hashtags:", err);
+        toast.error(`해시태그를 불러오는 데 실패했습니다: ${err.message}`);
+      }
+    };
+
     fetchSharedQuizzes();
+    fetchHashtags(); // 해시태그 불러오기
   }, [query]);
 
   if (loading) return <div className="text-center p-4">검색 중...</div>;
@@ -45,8 +61,33 @@ function SharedQuizzesContent() {
   return (
     <div className="space-y-4">
       <h1 className="text-3xl font-bold">
-        검색 결과 {query && <span className="text-purple-600">: &quot;{query}&quot;</span>}
+        공유 퀴즈 탐색 {query && <span className="text-purple-600">: &quot;{query}&quot;</span>}
       </h1>
+
+      {/* 해시태그 목록 표시 */}
+      {allHashtags.length > 0 && (
+        <div className="mt-4">
+          <h2 className="text-xl font-semibold mb-2">인기 해시태그</h2>
+          <div className="flex flex-wrap gap-2">
+            {allHashtags.map((tag, index) => (
+              <Link key={index} href={`/shared-quizzes?q=${encodeURIComponent(tag)}`}>
+                <Badge 
+                  variant={query === tag ? "default" : "secondary"} 
+                  className="cursor-pointer hover:bg-gray-200"
+                >
+                  #{tag}
+                </Badge>
+              </Link>
+            ))}
+            {query && ( // 현재 필터링 중인 해시태그가 있을 경우 "모두 보기" 버튼 추가
+              <Link href="/shared-quizzes">
+                <Button variant="outline" size="sm">모두 보기</Button>
+              </Link>
+            )}
+          </div>
+        </div>
+      )}
+
       {quizzes.length === 0 ? (
         <p>검색 결과에 해당하는 공유 퀴즈가 없습니다.</p>
       ) : (
@@ -66,7 +107,7 @@ function SharedQuizzesContent() {
                     {quiz.hashtags.map((tag, index) => (
                       <Link key={index} href={`/shared-quizzes?q=${encodeURIComponent(tag)}`}>
                         <Badge variant="secondary" className="cursor-pointer hover:bg-gray-200">
-                          {tag}
+                          #{tag}
                         </Badge>
                       </Link>
                     ))}
