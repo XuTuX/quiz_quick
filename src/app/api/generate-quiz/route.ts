@@ -88,7 +88,7 @@ export async function POST(req: NextRequest) {
         // ✅ AI가 생성한 퀴즈를 데이터베이스에 저장
         const newQuiz = await prisma.quiz.create({
             data: {
-                title: file.name.replace(".pdf", "") + " 퀴즈", // 파일 이름을 기반으로 제목 생성
+                title: (file.name.replace(".pdf", "") + " 퀴즈").normalize('NFC'), // 파일 이름을 기반으로 제목 생성 및 NFC 정규화
                 quizData: quizData, // JSON 형식으로 저장
                 isShared: false, // 기본적으로 비공개
                 userId: userId, // userId 추가

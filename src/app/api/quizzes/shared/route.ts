@@ -4,7 +4,7 @@ import prisma from "@/lib/prisma";
 export async function GET(req: NextRequest) {
     try {
         const { searchParams } = new URL(req.url);
-        const query = searchParams.get("search"); // 'search' 파라미터로 검색어 가져오기
+        const query = searchParams.get("q"); // 'q' 파라미터로 검색어 가져오기
 
         const whereClause: { isShared: boolean; title?: { contains: string; mode: "insensitive" } } = {
             isShared: true,

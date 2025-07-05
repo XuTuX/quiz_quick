@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
     SignedIn,
     SignedOut,
@@ -10,35 +10,22 @@ import {
     UserButton,
 } from "@clerk/nextjs";
 import { Brain, Sparkles, Plus, Search } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
-interface Quiz {
-    id: string;
-    title: string;
-}
-
 export default function AppHeader() {
     const pathname = usePathname();
-
-    /* --------- 검색 상태 --------- */
+    const router = useRouter();
     const [query, setQuery] = useState("");
-    const [results, setResults] = useState<Quiz[]>([]);
-    const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
-        const t = setTimeout(() => {
-            if (!query.trim()) return setResults([]);
+    const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        const trimmedQuery = query.trim();
+        if (!trimmedQuery) return;
 
-            fetch(`/api/quizzes/shared?query=${encodeURIComponent(query.trim())}`)
-                .then((r) => (r.ok ? r.json() : Promise.reject(r.statusText)))
-                .then((d) => setResults(d.quizzes))
-                .catch((e) => setError(String(e)));
-        }, 400);
-
-        return () => clearTimeout(t);
-    }, [query]);
+        router.push(`/shared-quizzes?q=${encodeURIComponent(trimmedQuery)}`);
+    };
 
     return (
         <header
@@ -66,36 +53,21 @@ export default function AppHeader() {
 
                     {/* Search (center) */}
                     <div className="relative flex-1 flex justify-center">
-                        <div className="relative w-full max-w-sm">
+                        <form
+                            onSubmit={handleSearchSubmit}
+                            className="relative w-full max-w-sm"
+                        >
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
                             <Input
                                 value={query}
                                 onChange={(e) => setQuery(e.target.value)}
-                                placeholder="퀴즈 검색…"
+                                placeholder="공유 퀴즈 검색…"
                                 className="pl-10 pr-3 h-9 rounded-xl bg-gray-50 border border-gray-300 focus-visible:ring-2 focus-visible:ring-purple-600"
                             />
-                            {/* dropdown results */}
-                            {query.trim() && (
-                                <ul className="absolute z-10 mt-1 w-full max-h-60 overflow-y-auto bg-white border border-gray-200 rounded-xl shadow-lg">
-                                    {results.length === 0 && (
-                                        <li className="px-4 py-2 text-sm text-gray-500">
-                                            {error ? `오류: ${error}` : "검색 결과가 없습니다."}
-                                        </li>
-                                    )}
-                                    {results.map((q) => (
-                                        <li key={q.id}>
-                                            <Link
-                                                href={`/quiz/${q.id}`}
-                                                className="block px-4 py-2 text-sm hover:bg-purple-50 hover:text-purple-700 truncate"
-                                                onClick={() => setQuery("")}
-                                            >
-                                                {q.title}
-                                            </Link>
-                                        </li>
-                                    ))}
-                                </ul>
-                            )}
-                        </div>
+                            <button type="submit" className="sr-only">
+                                검색
+                            </button>
+                        </form>
                     </div>
 
                     {/* Actions (right) */}
