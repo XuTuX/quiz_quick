@@ -129,22 +129,50 @@ export default function CreateQuizManualPage() {
   };
 
   /* ---------- submit (flattened array) ---------- */
+  /* ---------- submit (flattened array) ---------- */
   const handleSubmit = async () => {
-    // 빈값 체크
-    if (
-      !quizTitle.trim() ||
-      blocks.some(b =>
-        b.qaPairs.some(qa => !qa.question.trim() || !qa.answer.trim())
-      )
-    ) {
-      alert('제목과 모든 질문/답변을 입력해주세요.');
+    // 1️⃣ 빈 QA 쌍 제거
+    const filteredBlocks = blocks.map(block => ({
+      ...block,
+      qaPairs: block.qaPairs.filter(
+        qa => qa.question.trim() || qa.answer.trim()
+      ),
+    }));
+
+    // 2️⃣ 질문만 있고 답 없는 항목 찾기
+    const missingAnswers: string[] = [];
+    filteredBlocks.forEach(block => {
+      block.qaPairs.forEach(qa => {
+        if (qa.question.trim() && !qa.answer.trim()) {
+          missingAnswers.push(qa.question.trim());
+        }
+      });
+    });
+    if (missingAnswers.length) {
+      alert(
+        '다음 질문에 대한 답변을 입력해주세요:\\n' +
+        missingAnswers.map((q, i) => `${i + 1}. ${q}`).join('\\n')
+      );
       return;
     }
 
+    if (!quizTitle.trim()) {
+      alert('퀴즈 제목을 입력해주세요.');
+      return;
+    }
+
+    // 3️⃣ 기본 카테고리명 자동 지정
+    const getDefaultCategoryName = (idx: number) => {
+      const ordinals = ['첫', '두', '세', '네', '다섯', '여섯', '일곱', '여덟', '아홉', '열'];
+      const prefix = ordinals[idx] ?? `${idx + 1}`;
+      return `${prefix}번째 카테고리`;
+    };
+
     const quizData: QuizData = {};
-    blocks.forEach(block => {
-      if (block.category.trim()) {
-        quizData[block.category.trim()] = block.qaPairs.map(qa => ({
+    filteredBlocks.forEach((block, idx) => {
+      const name = block.category.trim() || getDefaultCategoryName(idx);
+      if (block.qaPairs.length > 0) {
+        quizData[name] = block.qaPairs.map(qa => ({
           question: qa.question.trim(),
           answer: qa.answer.trim(),
         }));
@@ -171,6 +199,7 @@ export default function CreateQuizManualPage() {
       alert('퀴즈 생성 중 오류가 발생했습니다.');
     }
   };
+
 
   /* ───────────────────── JSX ───────────────────── */
   return (
