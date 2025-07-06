@@ -14,7 +14,7 @@ async function getQuizData(id: string): Promise<QuizData | null> {
         return null;
     }
     const data = await res.json();
-    return data.quizData;
+    return data.quiz.quizData;
 }
 
 export default function QuizPage() {
