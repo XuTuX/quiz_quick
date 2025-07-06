@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
+import { QuizData } from '@/lib/types';
 import { Trash2, PlusCircle } from 'lucide-react';
 
 /* ───────────────────── Types ───────────────────── */
@@ -140,17 +141,19 @@ export default function CreateQuizManualPage() {
       return;
     }
 
-    // 모든 카테고리·QA를 평탄화(flatten)된 배열로
-    const questionsArray = blocks.flatMap(block =>
-      block.qaPairs.map(qa => ({
-        questionText: qa.question.trim(),
-        answerText: qa.answer.trim(),
-      }))
-    );
+    const quizData: QuizData = {};
+    blocks.forEach(block => {
+      if (block.category.trim()) {
+        quizData[block.category.trim()] = block.qaPairs.map(qa => ({
+          question: qa.question.trim(),
+          answer: qa.answer.trim(),
+        }));
+      }
+    });
 
     const payload = {
       title: quizTitle.trim(),
-      questions: questionsArray,
+      quizData,
     };
 
     try {

@@ -13,22 +13,19 @@ export async function POST(req: NextRequest) {
         }
 
         /* 2) 요청 파싱 */
-        const { title, questions }: {
+        const { title, quizData }: {
             title: string;
-            questions: Array<{ questionText: string; answerText: string }>;
+            quizData: QuizData;
         } = await req.json();
 
-        if (!title || !questions?.length) {
+        if (!title || !Object.keys(quizData).length) {
             return NextResponse.json(
                 { error: '제목과 퀴즈 데이터는 필수입니다.' },
                 { status: 400 },
             );
         }
 
-        /* 3) QuizData 변환 */
-        const quizData: QuizData = {
-            manual: questions.map(q => ({ question: q.questionText, answer: q.answerText })),
-        };
+        
 
         /* 4) DB 저장 */
         const newQuiz = await prisma.quiz.create({

@@ -10,12 +10,11 @@ export interface QA {
 // 퀴즈 카테고리 구조
 export type QuizItem = { question: string; answer: string };
 
-export type QuizData = Record<
-    string,
-    ReadonlyArray<QuizItem>  // 🔄 배열 앞에 ReadonlyArray<>
-     generated ?: QuizQuestion[];
-manual ?: ManualQuizItem[];
->;
+export type QuizData = {
+    [key: string]: ReadonlyArray<QuizItem>;
+    generated?: QuizQuestion[];
+    manual?: ManualQuizItem[];
+};
 
 
 export interface QuizQuestion {
