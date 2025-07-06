@@ -124,7 +124,20 @@ export async function POST(req: NextRequest) {
             },
         });
 
-        return NextResponse.json({ quizData, quizId: newQuiz.id }); // 새로 생성된 퀴즈 ID 반환
+        const usageMetadata = result.response.usageMetadata;
+        const promptTokenCount = usageMetadata?.promptTokenCount || 0;
+        const candidatesTokenCount = usageMetadata?.candidatesTokenCount || 0;
+
+        console.log("Gemini 사용량:", usageMetadata);
+
+        return NextResponse.json({
+            quizData,
+            quizId: newQuiz.id,
+            tokenUsage: {
+                promptTokens: promptTokenCount,
+                completionTokens: candidatesTokenCount,
+            },
+        }); // 새로 생성된 퀴즈 ID 및 토큰 사용량 반환
     } catch (err: any) {
         console.error("Error in generate-quiz API:", err);
         return NextResponse.json(
@@ -133,3 +146,4 @@ export async function POST(req: NextRequest) {
         );
     }
 }
+
