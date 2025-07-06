@@ -4,12 +4,9 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Quiz } from '@prisma/client';
 import { QuizData } from '@/lib/types';
-import {
-  Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle,
-} from '@/components/ui/card';
+
 import { Button } from '@/components/ui/button';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
+
 import { toast } from 'react-hot-toast';
 
 /* 1️⃣ totalLikes, questionCount 포함 타입 확장 */
@@ -95,62 +92,51 @@ export default function MyQuizzesPage() {
       {quizzes.length === 0 ? (
         <p>아직 생성된 퀴즈가 없습니다.</p>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 gap-2">
           {quizzes.map((quiz) => (
-            <Card key={quiz.id}>
-              <CardHeader>
-                {/* 2️⃣ 제목 + 좋아요 개수(회색) */}
-                <div className="flex items-center justify-between">
-                  <CardTitle>{quiz.title}</CardTitle>
-
-                  <div className="flex items-center gap-1 text-gray-500">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="w-4 h-4 fill-current"
-                      viewBox="0 0 24 24"
-                    >
-                      <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-                    </svg>
-                    <span className="text-sm">{quiz.totalLikes}</span>
-                  </div>
-                </div>
-
-                <CardDescription>
-                  생성일: {new Date(quiz.createdAt).toLocaleDateString()}
-                </CardDescription>
-                <CardDescription>
-                  문제 수: {quiz.questionCount}개
-                </CardDescription>
-              </CardHeader>
-
-              <CardContent>
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id={`share-${quiz.id}`}
-                    checked={quiz.isShared}
-                    onCheckedChange={() => handleToggleShare(quiz.id, quiz.isShared)}
-                  />
-                  <Label htmlFor={`share-${quiz.id}`}>
-                    {quiz.isShared ? '공유됨' : '비공개'}
-                  </Label>
-                </div>
-              </CardContent>
-
-              <CardFooter className="flex justify-between">
+            <div key={quiz.id} className="w-full border-b px-4 py-3 flex flex-col md:flex-row items-start md:items-center justify-between hover:bg-gray-50">
+              <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4 mb-2 md:mb-0">
+                <span className="text-sm text-gray-500">{new Date(quiz.createdAt).toLocaleDateString()}</span>
+                <span className="font-medium">{quiz.title}</span>
+                <span className="text-sm text-gray-500">{quiz.questionCount} 문제</span>
+                <span className="text-sm flex items-center gap-1">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="w-4 h-4 fill-current text-red-500"
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                  </svg>
+                  {quiz.totalLikes}
+                </span>
+                <span className="text-sm text-gray-500">
+                  {quiz.isShared ? '공개' : '비공개'}
+                </span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleToggleShare(quiz.id, quiz.isShared)}
+                  className="text-blue-600 hover:text-blue-800"
+                >
+                  {quiz.isShared ? '비공개로 전환' : '공개로 전환'}
+                </Button>
+              </div>
+              <div className="flex gap-2">
                 <Link href={`/quiz/${quiz.id}`}>
-                  <Button variant="outline">퀴즈 풀기</Button>
+                  <Button variant="outline" size="sm">풀기</Button>
                 </Link>
                 <Link href={`/edit-quiz/${quiz.id}`}>
-                  <Button variant="secondary">편집</Button>
+                  <Button variant="secondary" size="sm">편집</Button>
                 </Link>
                 <Button
                   variant="destructive"
+                  size="sm"
                   onClick={() => handleDelete(quiz.id)}
                 >
                   삭제
                 </Button>
-              </CardFooter>
-            </Card>
+              </div>
+            </div>
           ))}
         </div>
       )}
