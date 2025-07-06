@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Quiz } from '@prisma/client';
+import { QuizData } from '@/lib/types';
 import {
   Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle,
 } from '@/components/ui/card';
@@ -11,9 +12,10 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { toast } from 'react-hot-toast';
 
-/* 1️⃣ totalLikes 포함 타입 확장 */
+/* 1️⃣ totalLikes, questionCount 포함 타입 확장 */
 interface MyQuiz extends Quiz {
   totalLikes: number;
+  questionCount: number; // 퀴즈 문제 수 추가
 }
 
 export default function MyQuizzesPage() {
@@ -28,7 +30,15 @@ export default function MyQuizzesPage() {
       const res = await fetch('/api/quizzes/my-quizzes');
       if (!res.ok) throw new Error(`${res.status}`);
       const data = await res.json();
-      setQuizzes(data.quizzes);          // totalLikes 포함
+      const quizzesWithQuestionCount = data.quizzes.map((quiz: Quiz) => {
+        const quizData = quiz.quizData as QuizData;
+        let totalQuestions = 0;
+        for (const category in quizData) {
+          totalQuestions += quizData[category].length;
+        }
+        return { ...quiz, questionCount: totalQuestions };
+      });
+      setQuizzes(quizzesWithQuestionCount);
     } catch (e: any) {
       setError(e.message);
       toast.error(`퀴즈 불러오기 실패: ${e.message}`);
@@ -107,6 +117,9 @@ export default function MyQuizzesPage() {
 
                 <CardDescription>
                   생성일: {new Date(quiz.createdAt).toLocaleDateString()}
+                </CardDescription>
+                <CardDescription>
+                  문제 수: {quiz.questionCount}개
                 </CardDescription>
               </CardHeader>
 

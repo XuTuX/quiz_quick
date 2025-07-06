@@ -9,14 +9,17 @@ import {
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'react-hot-toast';
+import { QuizData } from '@/lib/types';
 
-/* 1️⃣ totalLikes 포함시킨 타입 */
+/* 1️⃣ totalLikes, questionCount 포함시킨 타입 */
 interface SharedQuiz {
   id: string;
   title: string;
   createdAt: string;
   hashtags: string[];
   totalLikes: number;     // ← 추가
+  quizData: any; // quizData 필드 추가
+  questionCount: number; // 퀴즈 문제 수 추가
 }
 
 function SharedQuizzesContent() {
@@ -35,7 +38,15 @@ function SharedQuizzesContent() {
         const res = await fetch(`/api/quizzes/shared?q=${encodeURIComponent(query)}`);
         if (!res.ok) throw new Error(`${res.status}`);
         const data = await res.json();
-        setQuizzes(data.quizzes);          // totalLikes 포함
+        const quizzesWithQuestionCount = data.quizzes.map((quiz: any) => {
+          const quizData = quiz.quizData as QuizData;
+          let totalQuestions = 0;
+          for (const category in quizData) {
+            totalQuestions += quizData[category].length;
+          }
+          return { ...quiz, questionCount: totalQuestions };
+        });
+        setQuizzes(quizzesWithQuestionCount);
       } catch (e: any) {
         setError(e.message);
         toast.error(`공유 퀴즈 불러오기 실패: ${e.message}`);
@@ -118,6 +129,9 @@ function SharedQuizzesContent() {
 
                 <CardDescription>
                   생성일: {new Date(quiz.createdAt).toLocaleDateString()}
+                </CardDescription>
+                <CardDescription>
+                  문제 수: {quiz.questionCount}개
                 </CardDescription>
               </CardHeader>
 
