@@ -140,6 +140,9 @@ export default function MyQuizzesPage() {
                 <Link href={`/quiz/${quiz.id}`}>
                   <Button variant="outline">퀴즈 풀기</Button>
                 </Link>
+                <Link href={`/edit-quiz/${quiz.id}`}>
+                  <Button variant="secondary">편집</Button>
+                </Link>
                 <Button
                   variant="destructive"
                   onClick={() => handleDelete(quiz.id)}

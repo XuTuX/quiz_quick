@@ -23,6 +23,7 @@ export default async function QuizCategorySelectPage({
       title: true,
       quizData: true,
       totalLikes: true,
+      userId: true, // Fetch quiz owner's ID
     },
   });
   if (!quiz) notFound();
@@ -62,6 +63,11 @@ export default async function QuizCategorySelectPage({
           <p className="text-center text-muted-foreground">
             학습할 카테고리를 선택하세요.
           </p>
+          {userId === quiz.userId && (
+            <Link href={`/edit-quiz/${params.id}`}>
+              <Button variant="outline" className="mt-4">편집</Button>
+            </Link>
+          )}
         </CardHeader>
 
         <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
