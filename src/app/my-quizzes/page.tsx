@@ -31,7 +31,7 @@ export default function MyQuizzesPage() {
       if (!res.ok) throw new Error(`${res.status}`);
       const data = await res.json();
       const quizzesWithQuestionCount = data.quizzes.map((quiz: Quiz) => {
-        const quizData = quiz.quizData as QuizData;
+        const quizData = quiz.quizData as unknown as QuizData;
         let totalQuestions = 0;
         for (const category in quizData) {
           totalQuestions += quizData[category].length;
