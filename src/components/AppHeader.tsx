@@ -76,6 +76,14 @@ export default function AppHeader() {
                             <>
                                 <Button
                                     asChild
+                                    className="rounded-xl bg-gray-200 hover:bg-gray-300 focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 text-gray-800 px-4 h-10 font-medium"
+                                >
+                                    <Link href="/pricing">
+                                        요금제
+                                    </Link>
+                                </Button>
+                                <Button
+                                    asChild
                                     className="rounded-xl bg-purple-700 hover:bg-purple-800 focus:ring-2 focus:ring-purple-600 focus:ring-offset-2 text-white px-4 h-10 font-medium"
                                 >
                                     <Link href="/create-quiz">
@@ -95,6 +103,15 @@ export default function AppHeader() {
                         </SignedIn>
 
                         <SignedOut>
+                            <Button
+                                variant="outline"
+                                className="h-9 rounded-xl border-2 border-gray-300"
+                                asChild
+                            >
+                                <Link href="/pricing">
+                                    요금제
+                                </Link>
+                            </Button>
                             <SignInButton mode="modal">
                                 <Button className="rounded-xl bg-purple-700 hover:bg-purple-800 text-white h-9 px-4">
                                     로그인
