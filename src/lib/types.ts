@@ -13,5 +13,18 @@ export type QuizItem = { question: string; answer: string };
 export type QuizData = Record<
     string,
     ReadonlyArray<QuizItem>  // 🔄 배열 앞에 ReadonlyArray<>
+     generated ?: QuizQuestion[];
+manual ?: ManualQuizItem[];
 >;
 
+
+export interface QuizQuestion {
+    question: string;
+    answer: string;
+}
+
+export interface ManualQuizItem {
+    category: string;
+    question: string;
+    answer: string;
+}

@@ -7,13 +7,14 @@ import { Progress } from '@/components/ui/progress';
 import { UploadCloud, File as FileIcon, XCircle } from 'lucide-react';
 import { QuizData } from '@/lib/types';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation'; // useRouter 임포트
+import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
 
 type UploadStatus = 'idle' | 'uploading' | 'generating' | 'success' | 'error';
 
 export default function CreateQuizPage() {
-  const router = useRouter(); // useRouter 훅 사용
+  const router = useRouter();
+  const [creationMethod, setCreationMethod] = useState<'select' | 'ai' | 'manual'>('select');
   const [file, setFile] = useState<File | null>(null);
   const [uploadStatus, setUploadStatus] = useState<UploadStatus>('idle');
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -77,7 +78,7 @@ export default function CreateQuizPage() {
       if (response.ok && contentType && contentType.includes('application/json')) {
         const data = await response.json();
         toast.success('퀴즈가 성공적으로 생성되어 저장되었습니다!');
-        router.push(`/quiz/${data.quizId}`); // 생성된 퀴즈 페이지로 리다이렉트
+        router.push(`/quiz/${data.quizId}`);
       } else {
         const textError = await response.text();
         throw new Error(response.statusText || textError.substring(0, 100) || '알 수 없는 서버 오류');
@@ -93,44 +94,68 @@ export default function CreateQuizPage() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-gray-50 p-4">
       <Card className="w-full max-w-lg">
-        <CardHeader><CardTitle className="text-2xl font-bold text-center">PDF로 AI 퀴즈 만들기</CardTitle></CardHeader>
+        <CardHeader>
+          <CardTitle className="text-2xl font-bold text-center">
+            {creationMethod === 'select' && '퀴즈 생성 방식 선택'}
+            {creationMethod === 'ai' && 'PDF로 AI 퀴즈 만들기'}
+          </CardTitle>
+        </CardHeader>
         <CardContent>
-          <div
-            className={`flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-lg transition-colors ${isDragOver ? 'border-blue-500 bg-blue-50' : 'border-gray-300'}`}
-            onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
-            onDragLeave={() => setIsDragOver(false)}
-            onDrop={handleDrop}
-          >
-            {uploadStatus === 'idle' && !file && (
-              <>
-                <UploadCloud className="w-12 h-12 text-gray-400" />
-                <p className="mt-2 text-sm text-gray-600">파일을 드래그하거나 클릭하여 업로드</p>
-                <p className="text-xs text-gray-500">PDF, MAX 10MB</p>
-                <input type="file" onChange={handleFileChange} accept="application/pdf" className="hidden" id="file-upload" />
-                <Button variant="outline" size="sm" className="mt-4" onClick={() => document.getElementById('file-upload')?.click()}>파일 선택</Button>
-              </>
-            )}
+          {creationMethod === 'select' && (
+            <div className="flex flex-col space-y-4">
+              <Button onClick={() => setCreationMethod('ai')} className="w-full py-6 text-lg">
+                AI로 퀴즈 만들기 (PDF)
+              </Button>
+              <Button onClick={() => router.push('/create-quiz/manual')} className="w-full py-6 text-lg" variant="outline">
+                직접 퀴즈 만들기
+              </Button>
+            </div>
+          )}
 
-            {file && uploadStatus !== 'uploading' && uploadStatus !== 'generating' && (
-              <div className="text-center"><FileIcon className="w-12 h-12 text-blue-500 mx-auto" /><p className="mt-2 text-sm font-medium">{file.name}</p><Button variant="ghost" size="sm" className="mt-2" onClick={() => setFile(null)}>파일 변경</Button></div>
-            )}
+          {creationMethod === 'ai' && (
+            <>
+              <div
+                className={`flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-lg transition-colors ${isDragOver ? 'border-blue-500 bg-blue-50' : 'border-gray-300'}`}
+                onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
+                onDragLeave={() => setIsDragOver(false)}
+                onDrop={handleDrop}
+              >
+                {uploadStatus === 'idle' && !file && (
+                  <>
+                    <UploadCloud className="w-12 h-12 text-gray-400" />
+                    <p className="mt-2 text-sm text-gray-600">파일을 드래그하거나 클릭하여 업로드</p>
+                    <p className="text-xs text-gray-500">PDF, MAX 10MB</p>
+                    <input type="file" onChange={handleFileChange} accept="application/pdf" className="hidden" id="file-upload" />
+                    <Button variant="outline" size="sm" className="mt-4" onClick={() => document.getElementById('file-upload')?.click()}>파일 선택</Button>
+                  </>
+                )}
 
-            {(uploadStatus === 'uploading' || uploadStatus === 'generating') && (
-              <div className="w-full text-center">
-                <p className="text-lg font-semibold mb-2">{uploadStatus === 'generating' ? 'AI가 퀴즈를 생성 중입니다...' : '파일 업로드 중...'}</p>
-                <p className="text-sm text-gray-500 mb-4">잠시만 기다려주세요.</p>
-                <Progress value={uploadProgress} className="w-full" />
+                {file && uploadStatus !== 'uploading' && uploadStatus !== 'generating' && (
+                  <div className="text-center"><FileIcon className="w-12 h-12 text-blue-500 mx-auto" /><p className="mt-2 text-sm font-medium">{file.name}</p><Button variant="ghost" size="sm" className="mt-2" onClick={() => setFile(null)}>파일 변경</Button></div>
+                )}
+
+                {(uploadStatus === 'uploading' || uploadStatus === 'generating') && (
+                  <div className="w-full text-center">
+                    <p className="text-lg font-semibold mb-2">{uploadStatus === 'generating' ? 'AI가 퀴즈를 생성 중입니다...' : '파일 업로드 중...'}</p>
+                    <p className="text-sm text-gray-500 mb-4">잠시만 기다려주세요.</p>
+                    <Progress value={uploadProgress} className="w-full" />
+                  </div>
+                )}
               </div>
-            )}
-          </div>
 
-          {errorMessage && (<div className="mt-4 flex items-center text-red-600"><XCircle className="w-4 h-4 mr-2" /><p className="text-sm">{errorMessage}</p></div>)}
+              {errorMessage && (<div className="mt-4 flex items-center text-red-600"><XCircle className="w-4 h-4 mr-2" /><p className="text-sm">{errorMessage}</p></div>)}
 
-          <div className="mt-6 flex justify-center">
-            <Button onClick={handleFileUpload} disabled={!file || uploadStatus === 'uploading' || uploadStatus === 'generating'} className="w-full">
-              퀴즈 생성하기
-            </Button>
-          </div>
+              <div className="mt-6 flex justify-center">
+                <Button onClick={handleFileUpload} disabled={!file || uploadStatus === 'uploading' || uploadStatus === 'generating'} className="w-full">
+                  퀴즈 생성하기
+                </Button>
+              </div>
+              <div className="mt-4 text-center">
+                <Button onClick={() => setCreationMethod('select')} variant="link">뒤로 가기</Button>
+              </div>
+            </>
+          )}
+
           <div className="mt-4 text-center">
             <Link href="/my-quizzes">
               <Button variant="link">내 퀴즈 관리하기</Button>
