@@ -33,19 +33,19 @@ export default function AppHeader() {
             role="banner"
             aria-label="사이트 헤더"
         >
-            <div className="bg-white border-2 border-gray-200 rounded-2xl shadow-lg">
-                <div className="flex h-16 items-center gap-6 px-6">
+            <div className="bg-white border border-gray-200 rounded-2xl shadow-xl">
+                <div className="flex h-20 items-center gap-6 px-6">
                     {/* Brand (left) */}
-                    <Link href="/" className="flex items-center gap-3">
+                    <Link href="/" className="flex items-center gap-4">
                         <div
-                            className="h-10 w-10 bg-purple-700 rounded-xl flex items-center justify-center"
+                            className="h-12 w-12 bg-purple-700 rounded-xl flex items-center justify-center"
                             role="img"
                             aria-label="로고"
                         >
-                            <Brain className="h-6 w-6 text-white" />
+                            <Brain className="h-7 w-7 text-white" />
                         </div>
 
-                        <span className="font-bold text-lg text-gray-900 hidden sm:inline">
+                        <span className="font-bold text-xl text-gray-900 hidden sm:inline">
                             <span className="text-purple-600">Quiz</span>
                             <span className="text-pink-500">Pick</span>
                         </span>
@@ -62,7 +62,7 @@ export default function AppHeader() {
                                 value={query}
                                 onChange={(e) => setQuery(e.target.value)}
                                 placeholder="공유 퀴즈 검색…"
-                                className="pl-10 pr-3 h-9 rounded-xl bg-gray-50 border border-gray-300 focus-visible:ring-2 focus-visible:ring-purple-600"
+                                className="pl-10 pr-3 h-11 rounded-xl bg-gray-50 border border-gray-300 focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-1"
                             />
                             <button type="submit" className="sr-only">
                                 검색
@@ -76,7 +76,7 @@ export default function AppHeader() {
                             <>
                                 <Button
                                     asChild
-                                    className="rounded-xl bg-gray-200 hover:bg-gray-300 focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 text-gray-800 px-4 h-10 font-medium"
+                                    className="rounded-xl bg-purple-50 hover:bg-purple-100 focus:ring-2 focus:ring-purple-400 focus:ring-offset-2 text-purple-700 px-5 h-11 text-base"
                                 >
                                     <Link href="/pricing">
                                         요금제
@@ -84,7 +84,7 @@ export default function AppHeader() {
                                 </Button>
                                 <Button
                                     asChild
-                                    className="rounded-xl bg-purple-700 hover:bg-purple-800 focus:ring-2 focus:ring-purple-600 focus:ring-offset-2 text-white px-4 h-10 font-medium"
+                                    className="rounded-xl bg-purple-700 hover:bg-purple-800 focus:ring-2 focus:ring-purple-600 focus:ring-offset-2 text-white px-5 h-11 text-base"
                                 >
                                     <Link href="/create-quiz">
                                         <Plus className="h-4 w-4 mr-1" /> 새 퀴즈
@@ -92,7 +92,7 @@ export default function AppHeader() {
                                 </Button>
                                 <Button
                                     asChild
-                                    className="rounded-xl bg-gray-200 hover:bg-gray-300 focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 text-gray-800 px-4 h-10 font-medium"
+                                    className="rounded-xl bg-purple-50 hover:bg-purple-100 focus:ring-2 focus:ring-purple-400 focus:ring-offset-2 text-purple-700 px-5 h-11 text-base"
                                 >
                                     <Link href="/my-quizzes">
                                         나의 페이지
@@ -105,7 +105,7 @@ export default function AppHeader() {
                         <SignedOut>
                             <Button
                                 variant="outline"
-                                className="h-9 rounded-xl border-2 border-gray-300"
+                                className="h-10 rounded-xl border-2 border-gray-300 px-5 bg-purple-50 hover:bg-purple-100 text-purple-700 focus:ring-2 focus:ring-purple-400 focus:ring-offset-2"
                                 asChild
                             >
                                 <Link href="/pricing">
@@ -113,14 +113,14 @@ export default function AppHeader() {
                                 </Link>
                             </Button>
                             <SignInButton mode="modal">
-                                <Button className="rounded-xl bg-purple-700 hover:bg-purple-800 text-white h-9 px-4">
+                                <Button className="rounded-xl bg-purple-700 hover:bg-purple-800 text-white h-10 px-5">
                                     로그인
                                 </Button>
                             </SignInButton>
                             <SignUpButton mode="modal">
                                 <Button
                                     variant="outline"
-                                    className="h-9 rounded-xl border-2 border-gray-300"
+                                    className="h-10 rounded-xl border-2 border-purple-300 px-5 text-purple-700"
                                 >
                                     회원가입
                                 </Button>

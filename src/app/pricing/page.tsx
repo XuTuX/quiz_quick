@@ -93,22 +93,24 @@ export default function PricingPage() {
       {/* Tabs */}
       <main className="max-w-5xl mx-auto px-6 py-12">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid grid-cols-2 gap-2 bg-white border border-gray-200 rounded-xl p-1.5 shadow">
+          <TabsList className="flex w-full bg-white border border-gray-200 rounded-full shadow p-1">
             <TabsTrigger
               value="tickets"
-              className="py-2 rounded-lg data-[state=active]:bg-purple-600 data-[state=active]:text-white text-sm font-medium"
+              className="w-1/2 py-4 text-sm font-medium rounded-full data-[state=active]:bg-purple-600 data-[state=active]:text-white transition"
             >
-              <Zap className="h-4 w-4 mr-1.5" />
+              <Zap className="h-4 w-4 mr-2" />
               티켓권
             </TabsTrigger>
             <TabsTrigger
               value="subscription"
-              className="py-2 rounded-lg data-[state=active]:bg-purple-600 data-[state=active]:text-white text-sm font-medium"
+              className="w-1/2 py-4 text-sm font-medium rounded-full data-[state=active]:bg-purple-600 data-[state=active]:text-white transition"
             >
-              <Crown className="h-4 w-4 mr-1.5" />
+              <Crown className="h-4 w-4 mr-2" />
               구독
             </TabsTrigger>
           </TabsList>
+
+
 
           {/* Ticket Plan */}
           <TabsContent value="tickets" className="mt-8">
