@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Quiz } from '@prisma/client';
 import { QuizData } from '@/lib/types';
 
@@ -16,6 +17,7 @@ interface MyQuiz extends Quiz {
 }
 
 export default function MyQuizzesPage() {
+  const router = useRouter();
   const [quizzes, setQuizzes] = useState<MyQuiz[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -94,7 +96,11 @@ export default function MyQuizzesPage() {
       ) : (
         <div className="grid grid-cols-1 gap-2">
           {quizzes.map((quiz) => (
-            <div key={quiz.id} className="w-full border-b px-4 py-3 flex flex-col md:flex-row items-start md:items-center justify-between hover:bg-gray-50">
+            <div
+              key={quiz.id}
+              className="w-full border-b px-4 py-3 flex flex-col md:flex-row items-start md:items-center justify-between hover:bg-gray-50 cursor-pointer"
+              onDoubleClick={() => router.push(`/quiz/${quiz.id}`)}
+            >
               <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4 mb-2 md:mb-0">
                 <span className="text-sm text-gray-500">{new Date(quiz.createdAt).toLocaleDateString()}</span>
                 <span className="font-medium">{quiz.title}</span>
