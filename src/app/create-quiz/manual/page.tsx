@@ -323,6 +323,7 @@ export default function CreateQuizManualPage() {
       >
         퀴즈 생성 완료
       </Button>
-    </main>
+    </div>
+  </main>
   );
 }
