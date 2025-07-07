@@ -1,14 +1,12 @@
-// /Users/kik/next_project/quizpick/src/app/create-quiz/manual/page.tsx
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { QuizData } from '@/lib/types';
-import { Trash2, PlusCircle } from 'lucide-react';
+import { Trash2, PlusCircle, ArrowLeft } from 'lucide-react';
 
 /* ───────────────────── Types ───────────────────── */
 interface QaPair {
@@ -20,14 +18,19 @@ interface Category {
   qaPairs: QaPair[];
 }
 
+interface QuizData {
+  [category: string]: QaPair[];
+}
+
 /* ───────────────────── Component ───────────────────── */
 export default function CreateQuizManualPage() {
+  const router = useRouter();
+
   /* ---------- state ---------- */
   const [quizTitle, setQuizTitle] = useState('');
   const [blocks, setBlocks] = useState<Category[]>([
     { category: '', qaPairs: [{ question: '', answer: '' }] },
   ]);
-  const router = useRouter();
 
   /* ---------- refs for focus ---------- */
   const refs = useRef<(HTMLTextAreaElement | HTMLInputElement | null)[][][]>([]);
@@ -47,7 +50,6 @@ export default function CreateQuizManualPage() {
   }, [blocks]);
 
   useEffect(() => {
-    // 실제 포커스 이동
     if (!focusTarget) return;
     const { b, r, f } = focusTarget;
     refs.current[b]?.[r]?.[f === 'question' ? 0 : 1]?.focus();
@@ -60,8 +62,10 @@ export default function CreateQuizManualPage() {
       ...prev,
       { category: '', qaPairs: [{ question: '', answer: '' }] },
     ]);
+
   const removeCategory = (bIdx: number) =>
     blocks.length > 1 && setBlocks(prev => prev.filter((_, i) => i !== bIdx));
+
   const updateCategoryTitle = (bIdx: number, title: string) =>
     setBlocks(prev =>
       prev.map((b, i) => (i === bIdx ? { ...b, category: title } : b))
@@ -76,6 +80,7 @@ export default function CreateQuizManualPage() {
           : b
       )
     );
+
   const removeRow = (bIdx: number, rIdx: number) =>
     setBlocks(prev =>
       prev.map((b, i) =>
@@ -84,6 +89,7 @@ export default function CreateQuizManualPage() {
           : b
       )
     );
+
   const updateRow = (
     bIdx: number,
     rIdx: number,
@@ -103,7 +109,6 @@ export default function CreateQuizManualPage() {
       )
     );
 
-  /* ---------- key navigation ---------- */
   const handleKey = (
     e: React.KeyboardEvent<HTMLTextAreaElement | HTMLInputElement>,
     bIdx: number,
@@ -113,26 +118,20 @@ export default function CreateQuizManualPage() {
     if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
       e.preventDefault();
       if (field === 'question') {
-        // Q → A
         setFocusTarget({ b: bIdx, r: rIdx, f: 'answer' });
       } else {
         const isLastRow = rIdx === blocks[bIdx].qaPairs.length - 1;
         if (isLastRow) {
-          // A → new row
           addRow(bIdx);
           setFocusTarget({ b: bIdx, r: rIdx + 1, f: 'question' });
         } else {
-          // A → next Q
           setFocusTarget({ b: bIdx, r: rIdx + 1, f: 'question' });
         }
       }
     }
   };
 
-  /* ---------- submit (flattened array) ---------- */
-  /* ---------- submit (flattened array) ---------- */
   const handleSubmit = async () => {
-    // 1️⃣ 빈 QA 쌍 제거
     const filteredBlocks = blocks.map(block => ({
       ...block,
       qaPairs: block.qaPairs.filter(
@@ -140,7 +139,6 @@ export default function CreateQuizManualPage() {
       ),
     }));
 
-    // 2️⃣ 질문만 있고 답 없는 항목 찾기
     const missingAnswers: string[] = [];
     filteredBlocks.forEach(block => {
       block.qaPairs.forEach(qa => {
@@ -162,7 +160,6 @@ export default function CreateQuizManualPage() {
       return;
     }
 
-    // 3️⃣ 기본 카테고리명 자동 지정
     const getDefaultCategoryName = (idx: number) => {
       const ordinals = ['첫', '두', '세', '네', '다섯', '여섯', '일곱', '여덟', '아홉', '열'];
       const prefix = ordinals[idx] ?? `${idx + 1}`;
@@ -201,27 +198,30 @@ export default function CreateQuizManualPage() {
     }
   };
 
-
   /* ───────────────────── JSX ───────────────────── */
   return (
-    <main className="flex min-h-screen flex-col items-center gap-6 p-4 bg-gray-50">
-      {/* 제목 */}
-      <Card className="w-full max-w-5xl shadow-lg">
-        <CardHeader>
-          <CardTitle className="text-3xl font-bold text-center text-gray-800">
-            퀴즈 제목
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Input
-            placeholder="예) 인체 해부학 퀴즈"
-            value={quizTitle}
-            onChange={e => setQuizTitle(e.target.value)}
-          />
-        </CardContent>
-      </Card>
+    <main className="container mx-auto p-4 md:p-8">
+      <div className="max-w-4xl mx-auto">
+        <Button variant="ghost" onClick={() => router.back()} className="mb-4">
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          뒤로가기
+        </Button>
 
-      {/* 카테고리 블록 */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle>퀴즈 정보</CardTitle>
+            <CardDescription>퀴즈의 제목을 입력해주세요.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Input
+              placeholder="예: 정보처리기사 2024년 1회 필기 요약"
+              value={quizTitle}
+              onChange={e => setQuizTitle(e.target.value)}
+              className="text-lg"
+            />
+          </CardContent>
+        </Card>
+
       {blocks.map((block, bIdx) => (
         <Card
           key={bIdx}
@@ -310,7 +310,6 @@ export default function CreateQuizManualPage() {
         </Card>
       ))}
 
-      {/* 카테고리 추가 / 제출 */}
       <Button
         onClick={addCategory}
         variant="outline"

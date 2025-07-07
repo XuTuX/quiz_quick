@@ -122,9 +122,9 @@ export default function CreateQuizPage() {
 
   const renderAiCreationScreen = () => (
     <div className="w-full max-w-lg">
-      <Button variant="ghost" size="sm" onClick={() => setCreationMethod('select')} className="mb-4">
+      <Button variant="ghost" onClick={() => setCreationMethod('select')} className="mb-4">
         <ArrowLeft className="w-4 h-4 mr-2" />
-        다른 방식으로 만들기
+        뒤로가기
       </Button>
       <Card>
         <CardHeader>
