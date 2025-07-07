@@ -128,11 +128,15 @@ export default function MyQuizzesPage() {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {new Date(quiz.createdAt).toLocaleDateString()}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 flex items-center">
-                        <MessageSquare className="w-4 h-4 mr-1" /> {quiz.questionCount}
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <div className="flex items-center">
+                          <MessageSquare className="w-4 h-4 mr-1" /> {quiz.questionCount}
+                        </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 flex items-center">
-                        <Heart className="w-4 h-4 mr-1 text-red-500" /> {quiz.totalLikes}
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <div className="flex items-center">
+                          <Heart className="w-4 h-4 mr-1 text-red-500" /> {quiz.totalLikes}
+                        </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
                         <Badge variant={quiz.isShared ? 'default' : 'secondary'}>

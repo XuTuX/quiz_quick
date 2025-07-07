@@ -2,24 +2,12 @@
 
 import Link from "next/link";
 import {
-  SignInButton,
-  SignUpButton,
-  SignedIn,
-  SignedOut,
-  UserButton,
-} from "@clerk/nextjs";
-import {
-  Brain,
   FileText,
   Share2,
-  Lightbulb,
-  ChevronRight,
+  Edit,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
-// A more descriptive name for the main application header
-
 
 // Simplified and more focused feature card
 function FeatureCard({
@@ -32,16 +20,12 @@ function FeatureCard({
   description: string;
 }) {
   return (
-    <div className="p-6 bg-white rounded-lg border border-gray-200">
-      <div className="flex items-start gap-4">
-        <div className="flex-shrink-0 h-10 w-10 flex items-center justify-center rounded-lg bg-purple-100 text-purple-700">
-          {icon}
-        </div>
-        <div>
-          <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
-          <p className="mt-1 text-gray-600">{description}</p>
-        </div>
+    <div className="p-8 bg-white rounded-lg border border-gray-200 flex flex-col items-center text-center shadow-sm hover:shadow-md transition-shadow">
+      <div className="mb-4 text-purple-700">
+        {icon}
       </div>
+      <h3 className="text-xl font-semibold text-gray-900 mb-2">{title}</h3>
+      <p className="text-gray-600">{description}</p>
     </div>
   );
 }
@@ -49,8 +33,6 @@ function FeatureCard({
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-white text-gray-800">
-      
-
       <main className="flex-1">
         {/* Hero Section */}
         <section className="py-20 md:py-32 text-center px-4">
@@ -81,19 +63,19 @@ export default function HomePage() {
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <FeatureCard
-                icon={<FileText className="h-6 w-6" />}
-                title="PDF에서 퀴즈 생성"
-                description="AI가 PDF를 분석하여 중요한 내용으로 문제를 자동 생성합니다."
+                icon={<FileText className="h-10 w-10" />}
+                title="PDF에서 AI 퀴즈 생성"
+                description="방대한 학습 자료도 문제 없어요. PDF 파일을 업로드하면 AI가 핵심 내용을 분석해 자동으로 퀴즈를 만들어 드립니다."
               />
               <FeatureCard
-                icon={<Lightbulb className="h-6 w-6" />}
-                title="맞춤형 복습"
-                description="학습 패턴을 분석하여 가장 효과적인 복습 일정을 제안합니다."
+                icon={<Edit className="h-10 w-10" />}
+                title="나만의 맞춤 퀴즈 직접 만들기"
+                description="원하는 주제로 직접 질문과 답변을 구성하여, 나에게 꼭 맞는 퀴즈를 손쉽게 제작할 수 있습니다."
               />
               <FeatureCard
-                icon={<Share2 className="h-6 w-6" />}
-                title="퀴즈 공유"
-                description="만든 퀴즈를 다른 사람과 공유하고 함께 풀어볼 수 있습니다."
+                icon={<Share2 className="h-10 w-10" />}
+                title="다양한 퀴즈 탐색 및 공유"
+                description="다른 사용자들이 만든 흥미로운 퀴즈를 풀어보고, 내가 만든 퀴즈를 공유하며 함께 지식을 넓혀가세요."
               />
             </div>
           </div>

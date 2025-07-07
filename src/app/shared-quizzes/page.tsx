@@ -31,7 +31,7 @@ function SearchBar({ initialQuery }: { initialQuery: string }) {
   };
 
   return (
-    <form onSubmit={handleSearch} className="flex w-full max-w-xl mx-auto mb-8">
+    <form onSubmit={handleSearch} className="flex w-full max-w-xl mx-auto mb-4">
       <Input
         type="search"
         placeholder="퀴즈 제목 또는 해시태그로 검색..."
@@ -97,9 +97,20 @@ function SharedQuizzesContent() {
       <div className="text-center mb-8">
         <h1 className="text-4xl font-bold">공유 퀴즈 탐색</h1>
         <p className="text-lg text-gray-600 mt-2">다른 사용자들이 만든 퀴즈를 풀어보세요.</p>
+        {query && (
+          <p className="text-sm text-gray-500 mt-2">현재 검색어: <span className="font-semibold">"{query}"</span></p>
+        )}
       </div>
       
       <SearchBar initialQuery={query} />
+
+      {query && (
+        <div className="text-center mb-8">
+          <Button variant="outline" onClick={() => router.push('/shared-quizzes')}>
+            검색 초기화
+          </Button>
+        </div>
+      )}
 
       {allHashtags.length > 0 && !query && (
         <div className="mb-12">
@@ -153,11 +164,15 @@ function SharedQuizzesContent() {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {new Date(quiz.createdAt).toLocaleDateString()}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 flex items-center">
-                      <MessageSquare className="w-4 h-4 mr-1" /> {quiz.questionCount}
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <div className="flex items-center">
+                        <MessageSquare className="w-4 h-4 mr-1" /> {quiz.questionCount}
+                      </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 flex items-center">
-                      <Heart className="w-4 h-4 mr-1 text-red-500" /> {quiz.totalLikes}
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <div className="flex items-center">
+                        <Heart className="w-4 h-4 mr-1 text-red-500" /> {quiz.totalLikes}
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                       {quiz.hashtags.length > 0 ? (
