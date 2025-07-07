@@ -69,6 +69,7 @@ export default function PricingPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+
       {/* Header */}
       <header className="bg-white border-b border-gray-200">
         <div className="max-w-5xl mx-auto px-6 py-8 flex flex-col gap-4">
@@ -87,8 +88,6 @@ export default function PricingPage() {
           </div>
         </div>
       </header>
-
-      {/* Tabs */}
       <main className="max-w-5xl mx-auto px-6 py-12">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="flex w-full bg-white border border-gray-200 rounded-full shadow p-1">
