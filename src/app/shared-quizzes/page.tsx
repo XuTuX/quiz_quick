@@ -8,9 +8,8 @@ import { toast } from 'react-hot-toast';
 import { QuizData } from '@/lib/types';
 import { useSearchParams, useRouter } from 'next/navigation';
 
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Heart, MessageSquare, Search } from 'lucide-react';
+import { Heart, MessageSquare, Search, Play } from 'lucide-react';
 
 interface SharedQuiz {
   id: string;
@@ -93,35 +92,6 @@ function SharedQuizzesContent() {
     fetchQuizzesAndHashtags();
   }, [query]);
 
-  const renderQuizCard = (quiz: SharedQuiz) => (
-    <Card key={quiz.id} className="flex flex-col justify-between hover:shadow-md transition-shadow cursor-pointer" onClick={() => router.push(`/quiz/${quiz.id}`)}>
-      <CardHeader>
-        <CardTitle className="text-xl font-bold">{quiz.title}</CardTitle>
-        <div className="text-sm text-gray-500 pt-2">
-          {new Date(quiz.createdAt).toLocaleDateString()}
-        </div>
-      </CardHeader>
-      <CardContent className="flex-grow">
-        <div className="flex items-center space-x-4 text-sm text-gray-600 mb-4">
-          <div className="flex items-center"><MessageSquare className="w-4 h-4 mr-1" /> {quiz.questionCount} 문제</div>
-          <div className="flex items-center"><Heart className="w-4 h-4 mr-1 text-red-500" /> {quiz.totalLikes} 좋아요</div>
-        </div>
-        {quiz.hashtags.length > 0 && (
-          <div className="flex flex-wrap gap-2">
-            {quiz.hashtags.map((tag) => (
-              <Badge key={tag} variant="secondary" className="cursor-pointer" onClick={(e) => { e.stopPropagation(); router.push(`/shared-quizzes?q=${encodeURIComponent(tag)}`); }}>
-                #{tag}
-              </Badge>
-            ))}
-          </div>
-        )}
-      </CardContent>
-      <CardFooter>
-        <Button className="w-full" onClick={(e) => { e.stopPropagation(); router.push(`/quiz/${quiz.id}`); }}>퀴즈 풀기</Button>
-      </CardFooter>
-    </Card>
-  );
-
   return (
     <div className="container mx-auto p-4 md:p-8">
       <div className="text-center mb-8">
@@ -144,12 +114,12 @@ function SharedQuizzesContent() {
         </div>
       )}
 
-      {loading && <p className="text-center">퀴즈를 불러오는 중입니다...</p>}
+      {loading && <p className="text-center text-gray-600">퀴즈를 불러오는 중입니다...</p>}
       {error && <p className="text-red-500 text-center">오류: {error}</p>}
 
       {!loading && !error && (
         quizzes.length === 0 ? (
-          <div className="text-center py-16 border-2 border-dashed rounded-lg">
+          <div className="text-center py-16 border-2 border-dashed rounded-lg bg-white">
             <h2 className="text-xl font-semibold">{query ? `"${query}"에 대한 검색 결과가 없습니다.` : "공유된 퀴즈가 없습니다."}</h2>
             <p className="text-gray-500 mt-2">다른 키워드로 검색하거나, 직접 퀴즈를 만들어 공유해보세요!</p>
             <div className="mt-6 flex gap-4 justify-center">
@@ -160,8 +130,57 @@ function SharedQuizzesContent() {
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {quizzes.map(renderQuizCard)}
+          <div className="overflow-x-auto bg-white rounded-lg shadow">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">제목</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">생성일</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">문제 수</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">좋아요</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">해시태그</th>
+                  <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">액션</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {quizzes.map((quiz) => (
+                  <tr key={quiz.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      <Link href={`/quiz/${quiz.id}`} className="hover:underline">
+                        {quiz.title}
+                      </Link>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {new Date(quiz.createdAt).toLocaleDateString()}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 flex items-center">
+                      <MessageSquare className="w-4 h-4 mr-1" /> {quiz.questionCount}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 flex items-center">
+                      <Heart className="w-4 h-4 mr-1 text-red-500" /> {quiz.totalLikes}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                      {quiz.hashtags.length > 0 ? (
+                        <div className="flex flex-wrap gap-1">
+                          {quiz.hashtags.map((tag) => (
+                            <Badge key={tag} variant="secondary" className="cursor-pointer" onClick={(e) => { e.stopPropagation(); router.push(`/shared-quizzes?q=${encodeURIComponent(tag)}`); }}>
+                              #{tag}
+                            </Badge>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="text-gray-400">없음</span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <Button variant="outline" size="sm" onClick={() => router.push(`/quiz/${quiz.id}`)} title="퀴즈 풀기">
+                        <Play className="w-4 h-4" />
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )
       )}
@@ -172,7 +191,6 @@ function SharedQuizzesContent() {
 export default function SharedQuizzesPage() {
   return (
     <div className="min-h-screen bg-gray-50">
-      
       <main>
         <Suspense fallback={<div className="text-center p-8">로딩 중...</div>}>
           <SharedQuizzesContent />

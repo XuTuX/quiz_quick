@@ -6,11 +6,9 @@ import { useRouter } from 'next/navigation';
 import { Quiz } from '@prisma/client';
 import { QuizData } from '@/lib/types';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from "@/components/ui/badge";
 import { toast } from 'react-hot-toast';
-
-import { Heart, MessageSquare, Eye, EyeOff, Edit, Trash2, PlusCircle } from 'lucide-react';
+import { Heart, MessageSquare, Eye, EyeOff, Edit, Trash2, PlusCircle, Play } from 'lucide-react';
 
 interface MyQuiz extends Quiz {
   totalLikes: number;
@@ -70,7 +68,6 @@ export default function MyQuizzesPage() {
       if (!res.ok) throw new Error(`상태 변경 실패: ${res.status}`);
       const { quiz: updatedQuiz } = await res.json();
       
-      // Ensure totalLikes and questionCount are preserved
       const originalQuiz = quizzes.find(q => q.id === id);
       const finalQuiz = { 
         ...updatedQuiz, 
@@ -85,36 +82,8 @@ export default function MyQuizzesPage() {
     }
   };
 
-  const renderQuizCard = (quiz: MyQuiz) => (
-    <Card key={quiz.id} className="flex flex-col justify-between">
-      <CardHeader>
-        <CardTitle className="text-xl font-bold cursor-pointer" onClick={() => router.push(`/quiz/${quiz.id}`)}>{quiz.title}</CardTitle>
-        <div className="text-sm text-gray-500 pt-2">
-          {new Date(quiz.createdAt).toLocaleDateString()} 생성
-        </div>
-      </CardHeader>
-      <CardContent className="flex-grow">
-        <div className="flex items-center space-x-4 text-sm text-gray-600">
-          <div className="flex items-center"><MessageSquare className="w-4 h-4 mr-1" /> {quiz.questionCount} 문제</div>
-          <div className="flex items-center"><Heart className="w-4 h-4 mr-1" /> {quiz.totalLikes} 좋아요</div>
-        </div>
-      </CardContent>
-      <CardFooter className="flex justify-between items-center">
-        <Badge variant={quiz.isShared ? 'default' : 'secondary'} className="cursor-pointer" onClick={() => handleToggleShare(quiz.id, quiz.isShared)}>
-          {quiz.isShared ? <Eye className="w-4 h-4 mr-1" /> : <EyeOff className="w-4 h-4 mr-1" />}
-          {quiz.isShared ? '공개' : '비공개'}
-        </Badge>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={() => router.push(`/edit-quiz/${quiz.id}`)}><Edit className="w-4 h-4" /></Button>
-          <Button variant="destructive" size="sm" onClick={() => handleDelete(quiz.id)}><Trash2 className="w-4 h-4" /></Button>
-        </div>
-      </CardFooter>
-    </Card>
-  );
-
   return (
     <div className="min-h-screen bg-gray-50">
-      
       <main className="container mx-auto p-4 md:p-8">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold">내 퀴즈 관리</h1>
@@ -123,12 +92,12 @@ export default function MyQuizzesPage() {
           </Button>
         </div>
 
-        {loading && <p>퀴즈를 불러오는 중입니다...</p>}
-        {error && <p className="text-red-500">오류: {error}</p>}
+        {loading && <p className="text-center text-gray-600">퀴즈를 불러오는 중입니다...</p>}
+        {error && <p className="text-center text-red-500">오류: {error}</p>}
 
         {!loading && !error && (
           quizzes.length === 0 ? (
-            <div className="text-center py-16 border-2 border-dashed rounded-lg">
+            <div className="text-center py-16 border-2 border-dashed rounded-lg bg-white">
               <h2 className="text-xl font-semibold">아직 생성된 퀴즈가 없습니다.</h2>
               <p className="text-gray-500 mt-2">새 퀴즈를 만들어 학습을 시작해보세요!</p>
               <Button asChild className="mt-6">
@@ -136,8 +105,61 @@ export default function MyQuizzesPage() {
               </Button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {quizzes.map(renderQuizCard)}
+            <div className="overflow-x-auto bg-white rounded-lg shadow">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">제목</th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">생성일</th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">문제 수</th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">좋아요</th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">공개 여부</th>
+                    <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">액션</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {quizzes.map((quiz) => (
+                    <tr key={quiz.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        <Link href={`/quiz/${quiz.id}`} className="hover:underline">
+                          {quiz.title}
+                        </Link>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {new Date(quiz.createdAt).toLocaleDateString()}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 flex items-center">
+                        <MessageSquare className="w-4 h-4 mr-1" /> {quiz.questionCount}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 flex items-center">
+                        <Heart className="w-4 h-4 mr-1 text-red-500" /> {quiz.totalLikes}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        <Badge variant={quiz.isShared ? 'default' : 'secondary'}>
+                          {quiz.isShared ? <Eye className="w-3 h-3 mr-1" /> : <EyeOff className="w-3 h-3 mr-1" />}
+                          {quiz.isShared ? '공개' : '비공개'}
+                        </Badge>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <div className="flex justify-end gap-2">
+                          <Button variant="outline" size="sm" onClick={() => router.push(`/quiz/${quiz.id}`)} title="퀴즈 풀기">
+                            <Play className="w-4 h-4" />
+                          </Button>
+                          <Button variant="outline" size="sm" onClick={() => router.push(`/edit-quiz/${quiz.id}`)} title="퀴즈 편집">
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button variant="outline" size="sm" onClick={() => handleToggleShare(quiz.id, quiz.isShared)} title={quiz.isShared ? '비공개로 전환' : '공개로 전환'}>
+                            {quiz.isShared ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                          </Button>
+                          <Button variant="destructive" size="sm" onClick={() => handleDelete(quiz.id)} title="퀴즈 삭제">
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )
         )}
