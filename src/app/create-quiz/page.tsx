@@ -1,14 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { UploadCloud, File as FileIcon, XCircle, ArrowLeft, Wand2, Edit } from 'lucide-react';
+import { UploadCloud, File as FileIcon, XCircle, ArrowLeft, Wand2, Edit, Ticket } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
-import { AppHeader } from '@/components/AppHeader';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import Link from 'next/link';
 
 type UploadStatus = 'idle' | 'uploading' | 'generating' | 'success' | 'error';
 
@@ -20,6 +20,27 @@ export default function CreateQuizPage() {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [errorMessage, setErrorMessage] = useState('');
   const [isDragOver, setIsDragOver] = useState(false);
+  const [ticketBalance, setTicketBalance] = useState<number | null>(null); // 티켓 잔액 상태
+
+  useEffect(() => {
+    const fetchTicketBalance = async () => {
+      try {
+        const res = await fetch('/api/user/tickets', {
+          credentials: 'include',
+        });
+        if (!res.ok) {
+          throw new Error(`Failed to fetch tickets: ${res.statusText}`);
+        }
+        const data = await res.json();
+        setTicketBalance(data.ticketBalance);
+      } catch (error) {
+        console.error("Error fetching ticket balance:", error);
+        setErrorMessage("티켓 잔액을 불러오는 데 실패했습니다.");
+        setTicketBalance(0); // Fallback to 0 tickets on error
+      }
+    };
+    fetchTicketBalance();
+  }, []);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -40,6 +61,14 @@ export default function CreateQuizPage() {
   };
 
   const handleFileUpload = async () => {
+    if (ticketBalance === null) {
+      setErrorMessage('티켓 잔액을 불러오는 중입니다. 잠시 후 다시 시도해주세요.');
+      return;
+    }
+    if (ticketBalance <= 0) {
+      setErrorMessage('티켓이 부족합니다. 티켓을 구매해주세요.');
+      return;
+    }
     if (!file) {
       setErrorMessage('파일을 선택해주세요.');
       return;
@@ -55,7 +84,6 @@ export default function CreateQuizPage() {
     const formData = new FormData();
     formData.append('file', file);
 
-    // Simulate upload progress
     let progress = 0;
     const interval = setInterval(() => {
       progress += 10;
@@ -70,6 +98,7 @@ export default function CreateQuizPage() {
       const response = await fetch('/api/generate-quiz', {
         method: 'POST',
         body: formData,
+        credentials: 'include',
       });
 
       clearInterval(interval);
@@ -77,11 +106,26 @@ export default function CreateQuizPage() {
 
       if (!response.ok) {
         const errorText = await response.text();
-        throw new Error(errorText || '퀴즈 생성에 실패했습니다.');
+        let parsedError = "";
+        try {
+          const errorJson = JSON.parse(errorText);
+          parsedError = errorJson.error || errorText;
+        } catch {
+          parsedError = errorText;
+        }
+        throw new Error(parsedError || '퀴즈 생성에 실패했습니다.');
       }
 
       const data = await response.json();
       toast.success('퀴즈가 성공적으로 생성되었습니다!');
+      // After successful generation, re-fetch ticket balance to reflect decrement
+      const updatedTicketRes = await fetch('/api/user/tickets', {
+        credentials: 'include',
+      });
+      if (updatedTicketRes.ok) {
+        const updatedTicketData = await updatedTicketRes.json();
+        setTicketBalance(updatedTicketData.ticketBalance);
+      }
       router.push(`/quiz/${data.quizId}`);
 
     } catch (error: any) {
@@ -134,6 +178,25 @@ export default function CreateQuizPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {ticketBalance !== null && (
+            <div className="flex items-center justify-center gap-2 mb-4 text-lg font-semibold text-gray-700">
+              <Ticket className="w-6 h-6 text-purple-600" />
+              <span>남은 티켓: {ticketBalance}개</span>
+            </div>
+          )}
+
+          {ticketBalance !== null && ticketBalance <= 0 && (
+            <Alert variant="destructive" className="mb-4">
+              <XCircle className="h-4 w-4" />
+              <AlertDescription>
+                티켓이 부족합니다. AI 퀴즈를 생성하려면 티켓이 필요합니다.
+                <Button asChild variant="link" className="p-0 h-auto text-base align-baseline">
+                  <Link href="/pricing?tab=tickets">티켓 구매하기</Link>
+                </Button>
+              </AlertDescription>
+            </Alert>
+          )}
+
           <div
             className={`flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-lg transition-colors ${isDragOver ? 'border-purple-500 bg-purple-50' : 'border-gray-300'}`}
             onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
@@ -175,7 +238,11 @@ export default function CreateQuizPage() {
           )}
 
           <div className="mt-6">
-            <Button onClick={handleFileUpload} disabled={!file || uploadStatus === 'uploading' || uploadStatus === 'generating'} className="w-full bg-purple-600 hover:bg-purple-700">
+            <Button
+              onClick={handleFileUpload}
+              disabled={!file || uploadStatus === 'uploading' || uploadStatus === 'generating' || ticketBalance === null || ticketBalance <= 0}
+              className="w-full bg-purple-600 hover:bg-purple-700"
+            >
               퀴즈 생성하기
             </Button>
           </div>

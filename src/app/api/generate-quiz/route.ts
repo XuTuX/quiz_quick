@@ -1,9 +1,8 @@
-// /Users/kik/next_project/quizpick/src/app/api/generate-quiz/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { QuizData } from "@/lib/types";
-import prisma from "@/lib/prisma"; // Prisma 클라이언트 임포트
-import { getAuth } from "@clerk/nextjs/server"; // Clerk getAuth 임포트
+import prisma from "@/lib/prisma";
+import { getAuth } from "@clerk/nextjs/server";
 
 export const runtime = "nodejs";
 export const preferredRegion = "iad1";
@@ -12,11 +11,28 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
 export async function POST(req: NextRequest) {
     try {
-        const { userId } = getAuth(req); // 현재 로그인한 사용자 ID 가져오기
-        console.log("API Route userId:", userId); // 디버깅을 위한 로그 추가
+        const { userId } = getAuth(req);
 
         if (!userId) {
             return new NextResponse("Unauthorized", { status: 401 });
+        }
+
+        // Fetch or create UserProfile and check ticket balance
+        let userProfile = await prisma.userProfile.findUnique({
+            where: { clerkUserId: userId },
+        });
+
+        if (!userProfile) {
+            userProfile = await prisma.userProfile.create({
+                data: {
+                    clerkUserId: userId,
+                    ticketBalance: 0, // Default for new users
+                },
+            });
+        }
+
+        if (userProfile.ticketBalance < 1) {
+            return new NextResponse("Not enough tickets. Please purchase more.", { status: 403 });
         }
 
         const formData = await req.formData();
@@ -29,14 +45,12 @@ export async function POST(req: NextRequest) {
                 { error: "PDF 파일만 업로드할 수 있습니다." },
                 { status: 400 },
             );
-        // 🔄 20 MB 한도로 상향
         if (file.size > 15 * 1024 * 1024)
             return NextResponse.json(
                 { error: "파일 크기는 15 MB를 초과할 수 없습니다." },
                 { status: 400 },
             );
 
-        // 🔄 PDF를 base64로 인라인 첨부
         const buffer = Buffer.from(await file.arrayBuffer());
 
         const model = genAI.getGenerativeModel({
@@ -123,14 +137,19 @@ export async function POST(req: NextRequest) {
 
         const { title, hashtags, ...categories } = quizData;
 
-        // ✅ AI가 생성한 퀴즈를 데이터베이스에 저장
+        // Decrement ticket balance after successful quiz generation
+        await prisma.userProfile.update({
+            where: { clerkUserId: userId },
+            data: { ticketBalance: { decrement: 1 } },
+        });
+
         const newQuiz = await prisma.quiz.create({
             data: {
-                title: title.normalize('NFC'), // AI가 생성한 제목 사용 및 NFC 정규화
-                quizData: categories, // 카테고리만 저장
-                isShared: false, // 기본적으로 비공개
-                userId: userId, // userId 추가
-                hashtags: hashtags, // 해시태그 추가
+                title: title.normalize('NFC'),
+                quizData: categories,
+                isShared: false,
+                userId: userId,
+                hashtags: hashtags,
             },
         });
 
@@ -147,7 +166,7 @@ export async function POST(req: NextRequest) {
                 promptTokens: promptTokenCount,
                 completionTokens: candidatesTokenCount,
             },
-        }); // 새로 생성된 퀴즈 ID 및 토큰 사용량 반환
+        });
     } catch (err: any) {
         console.error("Error in generate-quiz API:", err);
         return NextResponse.json(
