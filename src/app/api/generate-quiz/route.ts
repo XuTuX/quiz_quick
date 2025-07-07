@@ -1,3 +1,4 @@
+// /Users/kik/next_project/quizpick/src/app/api/generate-quiz/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { QuizData } from "@/lib/types";
@@ -51,8 +52,21 @@ export async function POST(req: NextRequest) {
 3. 질문은 "question" 필드에, 정답은 "answer" 필드에 담는다.
 4. 질문은 반드시 **하나의 정답**만 가지며, 주관식(단답형 또는 완성형)으로 작성한다.
 5. 같은 개념이라도 질문 문장이 완전히 동일하지 않도록 한다.
-6. 질문 유형은 용어 정의형, 빈칸 완성형, 원인·결과형으로 다양화한다.
-7. 정답은 문장형이 아니라 핵심 단어/구절로만 작성한다.
+6. 질문 유형은 용어 정의형, 빈칸 완성형, 원인·결과형으로한다.
+※ [유형별 문제 예시]
+ - 입력 텍스트: 장강: 꼬리뼈 끝과 항문 사이의 중점이고 주로 치질 치료에 쓰인다.
+- **용어 정의형 예시**
+  - question: "꼬리뼈 끝과 항문 사이의 중점을 지칭하는 경혈은?"
+    answer: "장강"
+
+- **빈칸 완성형 예시**
+  - question: "장강의 위치는 ___와 ___ 사이의 중점이다."
+    answer: "꼬리뼈 끝과 항문"
+
+- **원인·결과형 예시**
+  - question: "장강은 주로 어떤 질환 치료에 쓰이는가?"
+    answer: "치질"
+7. 정답은 문장형이 아니라 핵심 단어/구절로만 작성한다."정답 예시: 'ATP 생성', '미토콘드리아', '산화적 인산화'"
 8. 전체 퀴즈를 1개 이상의 카테고리(장·절·목차 등)에 따라 구조화한다.
 9. 카테고리 내 문제는 순서에 맞춰 정렬한다.
 10. 출력 형식:
@@ -82,21 +96,6 @@ export async function POST(req: NextRequest) {
     }
   ]
 }
-
-※ [유형별 문제 예시]
-
-- **용어 정의형 예시**
-  - 입력 텍스트: 장강: 꼬리뼈 끝과 항문 사이의 중점이고 주로 치질 치료에 쓰인다.
-  - question: "꼬리뼈 끝과 항문 사이의 중점을 지칭하는 경혈은?"
-    answer: "장강"
-
-- **빈칸 완성형 예시**
-  - question: "장강의 위치는 ___와 ___ 사이의 중점이다."
-    answer: "꼬리뼈 끝과 항문"
-
-- **원인·결과형 예시**
-  - question: "장강은 주로 어떤 질환 치료에 쓰이는가?"
-    answer: "치질"
     `;
         const result = await model.generateContent([
             {
@@ -157,4 +156,3 @@ export async function POST(req: NextRequest) {
         );
     }
 }
-

@@ -1,3 +1,4 @@
+// /Users/kik/next_project/quizpick/src/middleware.ts
 // middleware.ts
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 

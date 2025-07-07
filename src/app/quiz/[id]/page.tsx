@@ -1,3 +1,4 @@
+// /Users/kik/next_project/quizpick/src/app/quiz/[id]/page.tsx
 // src/app/quiz/[id]/page.tsx   ← 예: 페이지 파일 이름·경로 맞춰주세요
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";

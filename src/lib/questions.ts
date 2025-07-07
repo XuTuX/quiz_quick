@@ -1,8 +1,12 @@
-export const quizByCategory = {
-  // This will eventually contain quiz data categorized by major.
-  // For now, it's a placeholder to resolve the import error.
-  "placeholder": {
-    "sub1": [],
-    "sub2": []
+type QuizByCategory = {
+  [key: string]: {
+    [sub: string]: unknown[]
   }
-};
+}
+
+export const quizByCategory: QuizByCategory = {
+  placeholder: {
+    sub1: [],
+    sub2: [],
+  },
+}

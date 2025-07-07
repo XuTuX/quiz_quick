@@ -1,3 +1,4 @@
+// /Users/kik/next_project/quizpick/src/app/my-quizzes/page.tsx
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -99,7 +100,7 @@ export default function MyQuizzesPage() {
             <div
               key={quiz.id}
               className="w-full border-b px-4 py-3 flex flex-col md:flex-row items-start md:items-center justify-between hover:bg-gray-50 cursor-pointer"
-              onDoubleClick={() => router.push(`/quiz/${quiz.id}`)}
+              onClick={() => router.push(`/quiz/${quiz.id}`)}
             >
               <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4 mb-2 md:mb-0">
                 <span className="text-sm text-gray-500">{new Date(quiz.createdAt).toLocaleDateString()}</span>

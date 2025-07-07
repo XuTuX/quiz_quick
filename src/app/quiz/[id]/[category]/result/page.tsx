@@ -1,3 +1,4 @@
+// /Users/kik/next_project/quizpick/src/app/quiz/[id]/[category]/result/page.tsx
 
 'use client';
 

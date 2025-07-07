@@ -1,3 +1,4 @@
+// /Users/kik/next_project/quizpick/src/components/ui/progress.tsx
 "use client"
 
 import * as React from "react"

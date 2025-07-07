@@ -1,3 +1,4 @@
+// /Users/kik/next_project/quizpick/src/app/api/quizzes/create-manual/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { QuizData } from '@/lib/types';

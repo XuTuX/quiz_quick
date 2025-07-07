@@ -1,3 +1,4 @@
+// /Users/kik/next_project/quizpick/src/components/LikeButton.tsx
 "use client";
 
 import { useState, useOptimistic, useTransition } from "react";

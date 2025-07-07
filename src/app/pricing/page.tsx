@@ -1,3 +1,4 @@
+// /Users/kik/next_project/quizpick/src/app/pricing/page.tsx
 "use client";
 
 import {
@@ -71,10 +72,7 @@ export default function PricingPage() {
       {/* Header */}
       <header className="bg-white border-b border-gray-200">
         <div className="max-w-5xl mx-auto px-6 py-8 flex flex-col gap-4">
-          <Link href="/" className="flex items-center gap-2 text-purple-700 hover:text-purple-800">
-            <ArrowRight className="h-4 w-4 rotate-180" />
-            <span className="text-sm font-medium">홈으로 돌아가기</span>
-          </Link>
+
           <div className="text-center space-y-2">
             <div className="inline-flex items-center gap-2 bg-purple-50 border border-purple-200 rounded-full px-4 py-1.5">
               <Crown className="h-4 w-4 text-purple-700" />
@@ -207,12 +205,13 @@ export default function PricingPage() {
                   월간 구독 시작하기
                   <ArrowRight className="h-4 w-4 ml-1.5" />
                 </Button>
-                <p className="text-center text-xs text-gray-500">언제든 취소 가능 • 첫 달 50% 할인</p>
+                <p className="text-center text-xs text-gray-500">언제든 취소 가능 </p>
               </CardContent>
             </Card>
           </TabsContent>
         </Tabs>
       </main>
     </div>
+
   );
 }

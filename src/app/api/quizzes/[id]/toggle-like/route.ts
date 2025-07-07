@@ -1,3 +1,4 @@
+// /Users/kik/next_project/quizpick/src/app/api/quizzes/[id]/toggle-like/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getAuth } from "@clerk/nextjs/server";

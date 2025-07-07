@@ -1,3 +1,4 @@
+// /Users/kik/next_project/quizpick/src/app/api/quizzes/[id]/route.ts
 
 import { NextRequest, NextResponse } from "next/server"; // ✅ NextRequest로!
 import prisma from "@/lib/prisma";

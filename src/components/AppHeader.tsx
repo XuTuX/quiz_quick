@@ -9,7 +9,7 @@ import {
     SignUpButton,
     UserButton,
 } from "@clerk/nextjs";
-import { Brain, Sparkles, Plus, Search } from "lucide-react";
+import { Brain, Sparkles, Plus, Search, Globe } from "lucide-react";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -68,10 +68,19 @@ export default function AppHeader() {
                                 검색
                             </button>
                         </form>
+                        <Button
+                            variant="outline"
+                            className="ml-3 h-11 w-11 rounded-full border-2 border-purple-300 text-purple-700"
+                            asChild
+                        >
+                            <Link href="/shared-quizzes" aria-label="공유된 퀴즈 페이지로 이동">
+                                <Globe className="h-5 w-5" />
+                            </Link>
+                        </Button>
                     </div>
 
                     {/* Actions (right) */}
-                    <nav className="flex items-center gap-3 flex-none">
+                    <nav className="flex items-center gap-4 flex-none">
                         <SignedIn>
                             <>
                                 <Button
@@ -105,7 +114,7 @@ export default function AppHeader() {
                         <SignedOut>
                             <Button
                                 variant="outline"
-                                className="h-10 rounded-xl border-2 border-gray-300 px-5 bg-purple-50 hover:bg-purple-100 text-purple-700 focus:ring-2 focus:ring-purple-400 focus:ring-offset-2"
+                                className="h-10 rounded-xl border-2 border-purple-300 px-5 bg-purple-50 hover:bg-purple-100 text-purple-700 focus:ring-2 focus:ring-purple-400 focus:ring-offset-2"
                                 asChild
                             >
                                 <Link href="/pricing">
@@ -113,14 +122,14 @@ export default function AppHeader() {
                                 </Link>
                             </Button>
                             <SignInButton mode="modal">
-                                <Button className="rounded-xl bg-purple-700 hover:bg-purple-800 text-white h-10 px-5">
+                                <Button className="rounded-xl bg-purple-700 hover:bg-purple-800 text-white h-11 px-5">
                                     로그인
                                 </Button>
                             </SignInButton>
                             <SignUpButton mode="modal">
                                 <Button
                                     variant="outline"
-                                    className="h-10 rounded-xl border-2 border-purple-300 px-5 text-purple-700"
+                                    className="h-11 rounded-xl border-2 border-purple-300 px-5 text-purple-700"
                                 >
                                     회원가입
                                 </Button>

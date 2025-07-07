@@ -1,3 +1,4 @@
+// /Users/kik/next_project/quizpick/src/app/quiz/[id]/[category]/page.tsx
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
@@ -50,7 +51,8 @@ export default function QuizPage() {
                     let questionSet: QA[];
                     if (category === 'all') {
                         questionSet = [...Object.values(data).flat()];
-                    } else {
+                    }
+                    else {
                         questionSet = [...(data[category] || [])];
                     }
                     setQuestions(questionSet);

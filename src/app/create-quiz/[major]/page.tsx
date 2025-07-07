@@ -1,3 +1,4 @@
+// /Users/kik/next_project/quizpick/src/app/create-quiz/[major]/page.tsx
 "use client"
 
 import { useState } from "react"

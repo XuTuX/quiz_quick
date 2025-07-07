@@ -1,3 +1,4 @@
+// /Users/kik/next_project/quizpick/prisma/schema.prisma
 // prisma/schema.prisma
 generator client {
   provider = "prisma-client-js"

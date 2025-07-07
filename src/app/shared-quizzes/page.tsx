@@ -1,12 +1,14 @@
+// /Users/kik/next_project/quizpick/src/app/shared-quizzes/page.tsx
 'use client';
 
 import { useEffect, useState, Suspense } from 'react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'react-hot-toast';
 import { QuizData } from '@/lib/types';
+import { useSearchParams, useRouter } from 'next/navigation';
+
 
 /* 1️⃣ totalLikes, questionCount 포함시킨 타입 */
 interface SharedQuiz {
@@ -26,6 +28,8 @@ function SharedQuizzesContent() {
   const [allHashtags, setAllHashtags] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
+
 
   /* ------------- 데이터 로드 ------------- */
   useEffect(() => {
@@ -107,7 +111,8 @@ function SharedQuizzesContent() {
           {quizzes.map((quiz) => (
             <div
               key={quiz.id}
-              className="w-full border-b px-4 py-3 flex flex-col md:flex-row items-start md:items-center justify-between hover:bg-gray-50"
+              className="w-full border-b px-4 py-3 flex flex-col md:flex-row items-start md:items-center justify-between hover:bg-gray-50 cursor-pointer"
+              onClick={() => router.push(`/quiz/${quiz.id}`)} // ✅ onClick 추가
             >
               <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4 mb-2 md:mb-0">
                 <span className="text-sm text-gray-500">

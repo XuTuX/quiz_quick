@@ -1,3 +1,4 @@
+// /Users/kik/next_project/quizpick/src/app/edit-quiz/[id]/page.tsx
 'use client';
 
 import { useState, useRef, useEffect, use } from 'react';

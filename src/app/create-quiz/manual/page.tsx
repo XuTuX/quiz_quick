@@ -1,3 +1,4 @@
+// /Users/kik/next_project/quizpick/src/app/create-quiz/manual/page.tsx
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
@@ -150,8 +151,8 @@ export default function CreateQuizManualPage() {
     });
     if (missingAnswers.length) {
       alert(
-        '다음 질문에 대한 답변을 입력해주세요:\\n' +
-        missingAnswers.map((q, i) => `${i + 1}. ${q}`).join('\\n')
+        '다음 질문에 대한 답변을 입력해주세요:\n' +
+        missingAnswers.map((q, i) => `${i + 1}. ${q}`).join('\n')
       );
       return;
     }
