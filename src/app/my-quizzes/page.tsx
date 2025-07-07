@@ -1,4 +1,3 @@
-// /Users/kik/next_project/quizpick/src/app/my-quizzes/page.tsx
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -6,15 +5,16 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Quiz } from '@prisma/client';
 import { QuizData } from '@/lib/types';
-
 import { Button } from '@/components/ui/button';
-
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from "@/components/ui/badge";
 import { toast } from 'react-hot-toast';
 
-/* 1️⃣ totalLikes, questionCount 포함 타입 확장 */
+import { Heart, MessageSquare, Eye, EyeOff, Edit, Trash2, PlusCircle } from 'lucide-react';
+
 interface MyQuiz extends Quiz {
   totalLikes: number;
-  questionCount: number; // 퀴즈 문제 수 추가
+  questionCount: number;
 }
 
 export default function MyQuizzesPage() {
@@ -23,12 +23,11 @@ export default function MyQuizzesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  /* --------- 데이터 로드 --------- */
   const fetchQuizzes = async () => {
     try {
       setLoading(true);
       const res = await fetch('/api/quizzes/my-quizzes');
-      if (!res.ok) throw new Error(`${res.status}`);
+      if (!res.ok) throw new Error(`서버 오류: ${res.status}`);
       const data = await res.json();
       const quizzesWithQuestionCount = data.quizzes.map((quiz: Quiz) => {
         const quizData = quiz.quizData as unknown as QuizData;
@@ -41,7 +40,7 @@ export default function MyQuizzesPage() {
       setQuizzes(quizzesWithQuestionCount);
     } catch (e: any) {
       setError(e.message);
-      toast.error(`퀴즈 불러오기 실패: ${e.message}`);
+      toast.error(`퀴즈를 불러오는 데 실패했습니다: ${e.message}`);
     } finally {
       setLoading(false);
     }
@@ -49,16 +48,15 @@ export default function MyQuizzesPage() {
 
   useEffect(() => { fetchQuizzes(); }, []);
 
-  /* --------- 삭제 & 공유 토글 --------- */
   const handleDelete = async (id: string) => {
-    if (!confirm('정말로 이 퀴즈를 삭제하시겠습니까?')) return;
+    if (!confirm('정말로 이 퀴즈를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) return;
     try {
       const res = await fetch(`/api/quizzes/${id}/delete`, { method: 'DELETE' });
-      if (!res.ok) throw new Error(`${res.status}`);
+      if (!res.ok) throw new Error(`삭제 실패: ${res.status}`);
       setQuizzes((qs) => qs.filter((q) => q.id !== id));
-      toast.success('삭제되었습니다.');
+      toast.success('퀴즈가 삭제되었습니다.');
     } catch (e: any) {
-      toast.error(`삭제 실패: ${e.message}`);
+      toast.error(`삭제 중 오류 발생: ${e.message}`);
     }
   };
 
@@ -69,84 +67,81 @@ export default function MyQuizzesPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ isShared: !isShared }),
       });
-      if (!res.ok) throw new Error(`${res.status}`);
-      const { quiz: updated } = await res.json();
-      setQuizzes((qs) => qs.map((q) => (q.id === id ? updated : q)));
-      toast.success(!isShared ? '공유됨' : '비공개됨');
+      if (!res.ok) throw new Error(`상태 변경 실패: ${res.status}`);
+      const { quiz: updatedQuiz } = await res.json();
+      
+      // Ensure totalLikes and questionCount are preserved
+      const originalQuiz = quizzes.find(q => q.id === id);
+      const finalQuiz = { 
+        ...updatedQuiz, 
+        totalLikes: originalQuiz?.totalLikes ?? 0,
+        questionCount: originalQuiz?.questionCount ?? 0
+      };
+
+      setQuizzes((qs) => qs.map((q) => (q.id === id ? finalQuiz : q)));
+      toast.success(updatedQuiz.isShared ? '퀴즈가 공개되었습니다.' : '퀴즈가 비공개로 전환되었습니다.');
     } catch (e: any) {
-      toast.error(`변경 실패: ${e.message}`);
+      toast.error(`상태 변경 중 오류 발생: ${e.message}`);
     }
   };
 
-  /* --------- 렌더링 --------- */
-  if (loading) return <div className="container mx-auto p-4">로딩 중...</div>;
-  if (error) return <div className="container mx-auto p-4 text-red-500">오류: {error}</div>;
+  const renderQuizCard = (quiz: MyQuiz) => (
+    <Card key={quiz.id} className="flex flex-col justify-between">
+      <CardHeader>
+        <CardTitle className="text-xl font-bold cursor-pointer" onClick={() => router.push(`/quiz/${quiz.id}`)}>{quiz.title}</CardTitle>
+        <div className="text-sm text-gray-500 pt-2">
+          {new Date(quiz.createdAt).toLocaleDateString()} 생성
+        </div>
+      </CardHeader>
+      <CardContent className="flex-grow">
+        <div className="flex items-center space-x-4 text-sm text-gray-600">
+          <div className="flex items-center"><MessageSquare className="w-4 h-4 mr-1" /> {quiz.questionCount} 문제</div>
+          <div className="flex items-center"><Heart className="w-4 h-4 mr-1" /> {quiz.totalLikes} 좋아요</div>
+        </div>
+      </CardContent>
+      <CardFooter className="flex justify-between items-center">
+        <Badge variant={quiz.isShared ? 'default' : 'secondary'} className="cursor-pointer" onClick={() => handleToggleShare(quiz.id, quiz.isShared)}>
+          {quiz.isShared ? <Eye className="w-4 h-4 mr-1" /> : <EyeOff className="w-4 h-4 mr-1" />}
+          {quiz.isShared ? '공개' : '비공개'}
+        </Badge>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={() => router.push(`/edit-quiz/${quiz.id}`)}><Edit className="w-4 h-4" /></Button>
+          <Button variant="destructive" size="sm" onClick={() => handleDelete(quiz.id)}><Trash2 className="w-4 h-4" /></Button>
+        </div>
+      </CardFooter>
+    </Card>
+  );
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-6">내 퀴즈</h1>
-
-      <div className="mb-6">
-        <Link href="/create-quiz">
-          <Button>새 퀴즈 만들기</Button>
-        </Link>
-      </div>
-
-      {quizzes.length === 0 ? (
-        <p>아직 생성된 퀴즈가 없습니다.</p>
-      ) : (
-        <div className="grid grid-cols-1 gap-2">
-          {quizzes.map((quiz) => (
-            <div
-              key={quiz.id}
-              className="w-full border-b px-4 py-3 flex flex-col md:flex-row items-start md:items-center justify-between hover:bg-gray-50 cursor-pointer"
-              onClick={() => router.push(`/quiz/${quiz.id}`)}
-            >
-              <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4 mb-2 md:mb-0">
-                <span className="text-sm text-gray-500">{new Date(quiz.createdAt).toLocaleDateString()}</span>
-                <span className="font-medium">{quiz.title}</span>
-                <span className="text-sm text-gray-500">{quiz.questionCount} 문제</span>
-                <span className="text-sm flex items-center gap-1">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="w-4 h-4 fill-current text-red-500"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-                  </svg>
-                  {quiz.totalLikes}
-                </span>
-                <span className="text-sm text-gray-500">
-                  {quiz.isShared ? '공개' : '비공개'}
-                </span>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleToggleShare(quiz.id, quiz.isShared)}
-                  className="text-blue-600 hover:text-blue-800"
-                >
-                  {quiz.isShared ? '비공개로 전환' : '공개로 전환'}
-                </Button>
-              </div>
-              <div className="flex gap-2">
-                <Link href={`/quiz/${quiz.id}`}>
-                  <Button variant="outline" size="sm">풀기</Button>
-                </Link>
-                <Link href={`/edit-quiz/${quiz.id}`}>
-                  <Button variant="secondary" size="sm">편집</Button>
-                </Link>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => handleDelete(quiz.id)}
-                >
-                  삭제
-                </Button>
-              </div>
-            </div>
-          ))}
+    <div className="min-h-screen bg-gray-50">
+      
+      <main className="container mx-auto p-4 md:p-8">
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-3xl font-bold">내 퀴즈 관리</h1>
+          <Button asChild>
+            <Link href="/create-quiz"><PlusCircle className="w-4 h-4 mr-2" />새 퀴즈 만들기</Link>
+          </Button>
         </div>
-      )}
+
+        {loading && <p>퀴즈를 불러오는 중입니다...</p>}
+        {error && <p className="text-red-500">오류: {error}</p>}
+
+        {!loading && !error && (
+          quizzes.length === 0 ? (
+            <div className="text-center py-16 border-2 border-dashed rounded-lg">
+              <h2 className="text-xl font-semibold">아직 생성된 퀴즈가 없습니다.</h2>
+              <p className="text-gray-500 mt-2">새 퀴즈를 만들어 학습을 시작해보세요!</p>
+              <Button asChild className="mt-6">
+                <Link href="/create-quiz">퀴즈 만들러 가기</Link>
+              </Button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {quizzes.map(renderQuizCard)}
+            </div>
+          )
+        )}
+      </main>
     </div>
   );
 }

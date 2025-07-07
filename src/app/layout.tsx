@@ -5,7 +5,7 @@ import "./globals.css";
 
 import { ClerkProvider } from "@clerk/nextjs";
 import { Toaster } from "react-hot-toast"
-import AppHeader from "@/components/AppHeader";   // ← 새로 추가한 헤더
+import { AppHeader } from "@/components/AppHeader";   // ← 새로 추가한 헤더
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
