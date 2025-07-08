@@ -81,11 +81,6 @@ export default function HomePage() {
           </div>
         </section>
       </main>
-
-      {/* Footer */}
-      <footer className="py-8 text-center text-gray-500 border-t">
-        <p>&copy; {new Date().getFullYear()} QuizPick. All rights reserved.</p>
-      </footer>
     </div>
   );
 }
