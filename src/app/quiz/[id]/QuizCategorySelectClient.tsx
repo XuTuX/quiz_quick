@@ -37,26 +37,42 @@ export default function QuizCategorySelectClient({
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
   const handleCategoryChange = (category: string, checked: boolean) => {
-    setSelectedCategories((prev) =>
-      checked ? [...prev, category] : prev.filter((cat) => cat !== category)
-    );
+    setSelectedCategories((prev) => {
+      if (category === "all") {
+        return checked ? ["all"] : [];
+      } else {
+        if (checked) {
+          return prev.filter((cat) => cat !== "all" && cat !== category).concat(category);
+        } else {
+          return prev.filter((cat) => cat !== category);
+        }
+      }
+    });
   };
 
   const handleStartQuiz = () => {
-    if (selectedCategories.length > 0) {
+    if (selectedCategories.length === 0) {
+      alert("Please select at least one category.");
+      return;
+    }
+    if (selectedCategories.includes("all")) {
+      router.push(`/quiz/${quizId}/all`);
+    } else {
       const encodedCategories = selectedCategories.map(encodeURIComponent).join("/");
       router.push(`/quiz/${quizId}/${encodedCategories}`);
-    } else {
-      alert("Please select at least one category.");
     }
   };
 
   const handleStartLearn = () => {
-    if (selectedCategories.length > 0) {
+    if (selectedCategories.length === 0) {
+      alert("Please select at least one category.");
+      return;
+    }
+    if (selectedCategories.includes("all")) {
+      router.push(`/quiz/${quizId}/learn/all`);
+    } else {
       const encodedCategories = selectedCategories.map(encodeURIComponent).join("/");
       router.push(`/quiz/${quizId}/learn/${encodedCategories}`);
-    } else {
-      alert("Please select at least one category.");
     }
   };
 
@@ -87,15 +103,15 @@ export default function QuizCategorySelectClient({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* All Questions Card */}
               <div
-                className="p-6 border rounded-lg bg-purple-600 text-white hover:bg-purple-700 transition-colors flex justify-between items-center cursor-pointer md:col-span-2"
-                onClick={() => router.push(`/quiz/${quizId}/all`)}
+                className={`p-6 border rounded-lg transition-colors flex justify-between items-center cursor-pointer md:col-span-2 ${selectedCategories.includes("all") ? "bg-purple-600 text-white border-purple-600" : "bg-purple-100 text-purple-800 border-purple-300 hover:bg-purple-200"}`}
+                onClick={() => handleCategoryChange("all", !selectedCategories.includes("all"))}
               >
                 <div className="flex items-center">
                   <LayoutGrid className="w-6 h-6 mr-3" />
-                  <span className="text-xl font-semibold">전체 문제 풀기</span>
+                  <span className="text-xl font-semibold">전체 문제</span>
                 </div>
-                <Badge variant="secondary" className="text-base bg-purple-700 text-white">
-                  {allQuestionsCount} 문제
+                <Badge variant="secondary" className={`text-base ${selectedCategories.includes("all") ? "bg-purple-700 text-white" : "bg-purple-200 text-purple-800"}`}>
+                  {allQuestionsCount} 문항
                 </Badge>
               </div>
 
@@ -111,7 +127,7 @@ export default function QuizCategorySelectClient({
                     <span className="text-lg font-medium">{cat}</span>
                   </div>
                   <Badge variant="outline" className="text-base">
-                    {quizData[cat].length} 문제
+                    {quizData[cat].length} 문항
                   </Badge>
                 </div>
               ))}
@@ -121,7 +137,7 @@ export default function QuizCategorySelectClient({
                   className="flex-1 py-3 text-lg font-semibold"
                   disabled={selectedCategories.length === 0}
                 >
-                  선택한 카테고리로 시험 시작 ({selectedCategories.length}개)
+                  시험 시작
                 </Button>
                 <Button
                   onClick={handleStartLearn}
@@ -129,7 +145,7 @@ export default function QuizCategorySelectClient({
                   disabled={selectedCategories.length === 0}
                   variant="outline"
                 >
-                  선택한 카테고리로 학습하기 ({selectedCategories.length}개)
+                  학습하기
                 </Button>
               </div>
             </div>

@@ -27,9 +27,19 @@ export default function LearnPage() {
         getQuizData(id).then((data) => {
             if (!data) return;
             const grouped: Record<string, QA[]> = {};
-            cats.forEach((cat) => {
-                if (data[cat]) grouped[cat] = [...data[cat]];
-            });
+            if (cats.includes('all')) {
+                Object.keys(data).forEach((cat) => {
+                    if (data[cat]) {
+                        grouped[cat] = [...data[cat]];
+                    }
+                });
+            } else {
+                cats.forEach((cat) => {
+                    if (data[cat]) {
+                        grouped[cat] = [...data[cat]];
+                    }
+                });
+            }
             setQuestionsByCategory(grouped);
         });
     }, [id, cats]);
