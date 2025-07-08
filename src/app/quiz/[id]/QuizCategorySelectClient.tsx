@@ -51,6 +51,15 @@ export default function QuizCategorySelectClient({
     }
   };
 
+  const handleStartLearn = () => {
+    if (selectedCategories.length > 0) {
+      const encodedCategories = selectedCategories.map(encodeURIComponent).join("/");
+      router.push(`/quiz/${quizId}/learn/${encodedCategories}`);
+    } else {
+      alert("Please select at least one category.");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <main className="container mx-auto p-4 md:p-8">
@@ -106,13 +115,21 @@ export default function QuizCategorySelectClient({
                   </Badge>
                 </div>
               ))}
-              <div className="md:col-span-2 mt-4">
+              <div className="md:col-span-2 mt-4 flex gap-2">
                 <Button
                   onClick={handleStartQuiz}
-                  className="w-full py-3 text-lg font-semibold"
+                  className="flex-1 py-3 text-lg font-semibold"
                   disabled={selectedCategories.length === 0}
                 >
                   선택한 카테고리로 시험 시작 ({selectedCategories.length}개)
+                </Button>
+                <Button
+                  onClick={handleStartLearn}
+                  className="flex-1 py-3 text-lg font-semibold"
+                  disabled={selectedCategories.length === 0}
+                  variant="outline"
+                >
+                  선택한 카테고리로 학습하기 ({selectedCategories.length}개)
                 </Button>
               </div>
             </div>
