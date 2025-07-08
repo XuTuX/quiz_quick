@@ -124,9 +124,11 @@ export async function POST(req: NextRequest) {
         ]);
 
         const aiText = result.response.text();
+        console.log("AI Raw Text:", aiText); // 추가된 로깅
 
         // JSON 블록 추출
         const match = aiText.match(/```json\s*([\s\S]*?)\s*```|({[\s\S]*})/);
+        console.log("Regex Match Result:", match); // 추가된 로깅
         if (!match)
             return NextResponse.json(
                 { error: "AI가 유효한 퀴즈를 생성하지 못했습니다." },
@@ -134,6 +136,7 @@ export async function POST(req: NextRequest) {
             );
 
         let rawJson = match[1] || match[2];
+        console.log("Extracted rawJson:", rawJson); // 추가된 로깅
 
         let quizData: QuizData & { title: string; hashtags: string[] };
         try {
