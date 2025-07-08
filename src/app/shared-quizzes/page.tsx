@@ -58,6 +58,12 @@ function SharedQuizzesContent() {
 
   useEffect(() => {
     const fetchQuizzesAndHashtags = async () => {
+      if (!query) {
+        setQuizzes([]);
+        setLoading(false);
+        return;
+      }
+
       try {
         setLoading(true);
         const [quizRes, hashtagRes] = await Promise.all([
@@ -110,14 +116,15 @@ function SharedQuizzesContent() {
       {!loading && !error && (
         quizzes.length === 0 ? (
           <div className="text-center py-16 border-2 border-dashed rounded-lg bg-white">
-            <h2 className="text-xl font-semibold">{query ? `"${query}"에 대한 검색 결과가 없습니다.` : "공유된 퀴즈가 없습니다."}</h2>
-            <p className="text-gray-500 mt-2">다른 키워드로 검색하거나, 직접 퀴즈를 만들어 공유해보세요!</p>
-            <div className="mt-6 flex gap-4 justify-center">
-              <Button onClick={() => router.push('/shared-quizzes')}>모든 퀴즈 보기</Button>
-              <Button asChild variant="secondary">
-                <Link href="/create-quiz">퀴즈 만들러 가기</Link>
-              </Button>
-            </div>
+            <h2 className="text-xl font-semibold">{query ? `"${query}"에 대한 검색 결과가 없습니다.` : "검색어를 입력하여 공유된 퀴즈를 찾아보세요."}</h2>
+              <p className="text-gray-500 mt-2">{query ? "다른 키워드로 검색하거나, 직접 퀴즈를 만들어 공유해보세요!" : "제목이나 해시태그로 퀴즈를 검색할 수 있습니다."}</p>
+              <div className="mt-6 flex gap-4 justify-center">
+                {!query && (
+                  <Button asChild variant="secondary">
+                    <Link href="/create-quiz">퀴즈 만들러 가기</Link>
+                  </Button>
+                )}
+              </div>
           </div>
         ) : (
           <div className="overflow-x-auto bg-white rounded-lg shadow">
@@ -158,7 +165,7 @@ function SharedQuizzesContent() {
                         <div className="flex flex-wrap gap-1">
                           {quiz.hashtags.map((tag) => (
                             <Badge key={tag} variant="secondary" className="cursor-pointer" onClick={(e) => { e.stopPropagation(); router.push(`/shared-quizzes?q=${encodeURIComponent(tag)}`); }}>
-                              #{tag}
+                              {tag}
                             </Badge>
                           ))}
                         </div>

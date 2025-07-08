@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import LikeButton from "@/components/LikeButton";
 import Link from "next/link";
@@ -23,18 +23,18 @@ export default async function QuizCategorySelectPage({
       title: true,
       quizData: true,
       totalLikes: true,
-      userId: true, // Fetch quiz owner's ID
+      userId: true,
     },
   });
   if (!quiz) notFound();
 
   const initiallyLiked = userId
     ? Boolean(
-        await prisma.like.findUnique({
-          where: { quizId_userId: { quizId: params.id, userId } },
-          select: { id: true },
-        })
-      )
+      await prisma.like.findUnique({
+        where: { quizId_userId: { quizId: params.id, userId } },
+        select: { id: true },
+      })
+    )
     : false;
 
   const quizData = quiz.quizData as Record<string, any[]>;
@@ -46,17 +46,11 @@ export default async function QuizCategorySelectPage({
 
   return (
     <div className="min-h-screen bg-gray-50">
-      
       <main className="container mx-auto p-4 md:p-8">
         <Card className="w-full max-w-3xl mx-auto">
-          <CardHeader className="flex-row items-start justify-between">
-            <div>
-              <CardTitle className="text-3xl font-bold">{quiz.title}</CardTitle>
-              <CardDescription className="mt-2">
-                학습할 카테고리를 선택하세요.
-              </CardDescription>
-            </div>
-            <div className="flex items-center gap-2 flex-shrink-0">
+          <CardHeader className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
+            <CardTitle className="text-3xl font-bold">{quiz.title}</CardTitle>
+            <div className="flex items-center gap-2">
               {userId === quiz.userId && (
                 <Button asChild variant="outline" size="sm">
                   <Link href={`/edit-quiz/${params.id}`}>
@@ -73,7 +67,7 @@ export default async function QuizCategorySelectPage({
             </div>
           </CardHeader>
 
-          <CardContent className="mt-6">
+          <CardContent className="mt-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* All Questions Card */}
               <Link href={`/quiz/${params.id}/all`} className="md:col-span-2">

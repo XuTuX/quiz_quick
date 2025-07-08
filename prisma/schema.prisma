@@ -15,6 +15,7 @@ model Quiz {
   quizData   Json
   isShared   Boolean  @default(false)
   userId     String
+  creator    UserProfile @relation(fields: [userId], references: [clerkUserId])
   hashtags   String[] @default([])   // <-- 이전 그대로
   totalLikes Int      @default(0)    // 👍 카운트 캐싱
   createdAt  DateTime @default(now())
@@ -40,4 +41,5 @@ model UserProfile {
   ticketBalance Int      @default(0)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+  quizzes       Quiz[]
 }
