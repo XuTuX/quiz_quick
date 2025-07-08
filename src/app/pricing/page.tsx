@@ -80,10 +80,10 @@ export default function PricingPage() {
               <span className="text-xs font-medium text-purple-800">요금제 안내</span>
             </div>
             <h1 className="text-3xl md:text-4xl font-bold text-gray-900">
-              <span className="text-purple-700">작은 PDF는 무료</span>, 큰 PDF는 유료
+              <span className="text-purple-700">작은 PDF는 무료</span>, 큰 PDF는 유료로 변환 가능
             </h1>
             <p className="text-sm md:text-base text-gray-700">
-              무료로 체험하고, 필요시 티켓권이나 구독으로 업그레이드하세요.
+              무료로 체험하고, 필요시 티켓권이나 구독으로 업그레이드하여 더 많은 기능을 활용해보세요.
             </p>
           </div>
         </div>
@@ -196,7 +196,7 @@ export default function PricingPage() {
                     <div className="text-xs text-gray-600">월 생성 횟수</div>
                   </div>
                   <div>
-                    <div className="text-xl font-bold text-purple-700">82원</div>
+                    <div className="text-xl font-bold text-purple-700">32원</div>
                     <div className="text-xs text-gray-600">회당 비용</div>
                   </div>
                 </div>
