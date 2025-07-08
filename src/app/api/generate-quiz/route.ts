@@ -25,12 +25,7 @@ export async function POST(req: NextRequest) {
         });
 
         if (!userProfile) {
-            userProfile = await prisma.userProfile.create({
-                data: {
-                    clerkUserId: userId,
-                    ticketBalance: 0, // Default for new users
-                },
-            });
+            return new NextResponse("User profile not found.", { status: 404 });
         }
 
         if (userProfile.ticketBalance < 1) {
