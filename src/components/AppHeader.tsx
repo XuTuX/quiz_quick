@@ -13,6 +13,9 @@ import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { Ticket } from "lucide-react";
 
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Settings } from 'lucide-react';
+
 export function AppHeader() {
   const { isSignedIn } = useUser();
   const [ticketBalance, setTicketBalance] = useState<number | null>(null);
@@ -68,6 +71,18 @@ export function AppHeader() {
             <Button asChild>
               <Link href="/create-quiz">퀴즈 만들기</Link>
             </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <Settings className="h-5 w-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem asChild>
+                  <Link href="/user/profile">프로필 설정</Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <UserButton afterSignOutUrl="/" />
           </SignedIn>
           <SignedOut>
