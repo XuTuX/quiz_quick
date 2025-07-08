@@ -3,6 +3,8 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { QuizData } from "@/lib/types";
 import prisma from "@/lib/prisma";
 import { getAuth } from "@clerk/nextjs/server";
+import JSON5 from 'json5';  // 새로 추가
+
 
 export const runtime = "nodejs";
 export const preferredRegion = "iad1";
@@ -131,7 +133,19 @@ export async function POST(req: NextRequest) {
                 { status: 500 },
             );
 
-        const quizData: QuizData & { title: string; hashtags: string[] } = JSON.parse(match[1] || match[2]);
+        let rawJson = match[1] || match[2];
+
+        let quizData: QuizData & { title: string; hashtags: string[] };
+        try {
+            quizData = JSON5.parse(rawJson);
+        } catch (e) {
+            console.error("JSON5 파싱 오류:", e, rawJson);
+            return NextResponse.json(
+                { error: "AI가 생성한 JSON 형식이 유효하지 않습니다." },
+                { status: 500 },
+            );
+        }
+
         if (!Object.keys(quizData).length) // quizData 객체에 카테고리가 있는지 확인
             throw new Error("Generated quiz data is empty.");
 

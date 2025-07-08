@@ -142,7 +142,29 @@ export default function PricingPage() {
                     </div>
                   ))}
                 </div>
-                <Button className="w-full rounded-lg bg-purple-600 hover:bg-purple-700 font-medium">
+                <Button
+                  className="w-full rounded-lg bg-purple-600 hover:bg-purple-700 font-medium"
+                  onClick={async () => {
+                    try {
+                      const response = await fetch("/api/user/tickets", {
+                        method: "POST",
+                        headers: {
+                          "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({ ticketsToAdd: ticketPlan.tickets }),
+                      });
+                      if (response.ok) {
+                        alert("티켓 구매가 완료되었습니다!");
+                        // Optionally, refresh user data or display updated ticket balance
+                      } else {
+                        alert("티켓 구매에 실패했습니다.");
+                      }
+                    } catch (error) {
+                      console.error("Failed to purchase tickets:", error);
+                      alert("티켓 구매 중 오류가 발생했습니다.");
+                    }
+                  }}
+                >
                   구매하기
                   <ArrowRight className="h-4 w-4 ml-1.5" />
                 </Button>
@@ -200,7 +222,10 @@ export default function PricingPage() {
                     <div className="text-xs text-gray-600">회당 비용</div>
                   </div>
                 </div>
-                <Button className="w-full rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 font-medium text-sm py-2.5">
+                <Button
+                  className="w-full rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 font-medium text-sm py-2.5"
+                  onClick={() => alert("결제가 완료되었습니다! (시뮬레이션)")}
+                >
                   월간 구독 시작하기
                   <ArrowRight className="h-4 w-4 ml-1.5" />
                 </Button>

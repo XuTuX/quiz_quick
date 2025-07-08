@@ -1,11 +1,11 @@
-import { auth } from "@clerk/nextjs/server";   // ✅ 올바른 경로
+import { auth } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
     const { userId } = await auth();
-    console.log("[API_USER_TICKETS] userId:", userId); // 디버깅 로그 추가
+    console.log("[API_USER_TICKETS] userId:", userId);
 
     if (!userId) {
       return new NextResponse("Unauthorized", { status: 401 });
@@ -16,11 +16,10 @@ export async function GET() {
     });
 
     if (!userProfile) {
-      // If user profile doesn't exist, create one with default ticket balance
       userProfile = await prisma.userProfile.create({
         data: {
           clerkUserId: userId,
-          ticketBalance: 0, // Default ticket balance for new users
+          ticketBalance: 0,
         },
       });
     }
@@ -28,6 +27,49 @@ export async function GET() {
     return NextResponse.json({ ticketBalance: userProfile.ticketBalance });
   } catch (error) {
     console.error("[API_USER_TICKETS_GET]", error);
+    return new NextResponse("Internal Error", { status: 500 });
+  }
+}
+
+export async function POST(req: Request) {
+  try {
+    const { userId } = await auth();
+
+    if (!userId) {
+      return new NextResponse("Unauthorized", { status: 401 });
+    }
+
+    const { ticketsToAdd } = await req.json();
+
+    if (typeof ticketsToAdd !== 'number' || ticketsToAdd <= 0) {
+      return new NextResponse("Invalid ticketsToAdd value", { status: 400 });
+    }
+
+    let userProfile = await prisma.userProfile.findUnique({
+      where: { clerkUserId: userId },
+    });
+
+    if (!userProfile) {
+      userProfile = await prisma.userProfile.create({
+        data: {
+          clerkUserId: userId,
+          ticketBalance: ticketsToAdd,
+        },
+      });
+    } else {
+      userProfile = await prisma.userProfile.update({
+        where: { clerkUserId: userId },
+        data: {
+          ticketBalance: {
+            increment: ticketsToAdd,
+          },
+        },
+      });
+    }
+
+    return NextResponse.json({ ticketBalance: userProfile.ticketBalance });
+  } catch (error) {
+    console.error("[API_USER_TICKETS_POST]", error);
     return new NextResponse("Internal Error", { status: 500 });
   }
 }
