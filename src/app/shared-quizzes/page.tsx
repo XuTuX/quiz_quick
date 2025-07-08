@@ -101,29 +101,8 @@ function SharedQuizzesContent() {
           <p className="text-sm text-gray-500 mt-2">현재 검색어: <span className="font-semibold">"{query}"</span></p>
         )}
       </div>
-      
+
       <SearchBar initialQuery={query} />
-
-      {query && (
-        <div className="text-center mb-8">
-          <Button variant="outline" onClick={() => router.push('/shared-quizzes')}>
-            검색 초기화
-          </Button>
-        </div>
-      )}
-
-      {allHashtags.length > 0 && !query && (
-        <div className="mb-12">
-          <h2 className="text-xl font-semibold mb-4 text-center">인기 해시태그</h2>
-          <div className="flex flex-wrap gap-2 justify-center">
-            {allHashtags.map((tag) => (
-              <Button key={tag} variant="outline" onClick={() => router.push(`/shared-quizzes?q=${encodeURIComponent(tag)}`)}>
-                #{tag}
-              </Button>
-            ))}
-          </div>
-        </div>
-      )}
 
       {loading && <p className="text-center text-gray-600">퀴즈를 불러오는 중입니다...</p>}
       {error && <p className="text-red-500 text-center">오류: {error}</p>}
