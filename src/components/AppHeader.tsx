@@ -15,33 +15,19 @@ import { Ticket } from "lucide-react";
 
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Settings } from 'lucide-react';
+import useSWR from 'swr';
+
+const fetcher = (url: string) =>
+  fetch(url, { credentials: 'include' }).then((res) => res.json());
 
 export function AppHeader() {
   const { isSignedIn } = useUser();
-  const [ticketBalance, setTicketBalance] = useState<number | null>(null);
+  const { data, mutate } = useSWR(
+    isSignedIn ? '/api/user/tickets' : null,
+    fetcher
+  );
 
-  useEffect(() => {
-    const fetchTicketBalance = async () => {
-      if (!isSignedIn) {
-        setTicketBalance(null);
-        return;
-      }
-      try {
-        const res = await fetch('/api/user/tickets', {
-          credentials: 'include',
-        });
-        if (!res.ok) {
-          throw new Error(`Failed to fetch tickets: ${res.statusText}`);
-        }
-        const data = await res.json();
-        setTicketBalance(data.ticketBalance);
-      } catch (error) {
-        console.error("Error fetching ticket balance in AppHeader:", error);
-        setTicketBalance(0); // Fallback to 0 on error
-      }
-    };
-    fetchTicketBalance();
-  }, [isSignedIn]);
+  const ticketBalance = data?.ticketBalance ?? null;
 
   return (
     <header className="w-full px-4 sm:px-6 lg:px-8 bg-white/80 backdrop-blur-sm sticky top-0 z-50">

@@ -1,7 +1,8 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import useSWR from 'swr';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -20,27 +21,12 @@ export default function CreateQuizPage() {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [errorMessage, setErrorMessage] = useState('');
   const [isDragOver, setIsDragOver] = useState(false);
-  const [ticketBalance, setTicketBalance] = useState<number | null>(null); // 티켓 잔액 상태
 
-  useEffect(() => {
-    const fetchTicketBalance = async () => {
-      try {
-        const res = await fetch('/api/user/tickets', {
-          credentials: 'include',
-        });
-        if (!res.ok) {
-          throw new Error(`Failed to fetch tickets: ${res.statusText}`);
-        }
-        const data = await res.json();
-        setTicketBalance(data.ticketBalance);
-      } catch (error) {
-        console.error("Error fetching ticket balance:", error);
-        setErrorMessage("티켓 잔액을 불러오는 데 실패했습니다.");
-        setTicketBalance(0); // Fallback to 0 tickets on error
-      }
-    };
-    fetchTicketBalance();
-  }, []);
+  const { data: swrTicketData, mutate: mutateTickets } = useSWR(
+    '/api/user/tickets',
+    (url) => fetch(url, { credentials: 'include' }).then((res) => res.json())
+  );
+  const ticketBalance = swrTicketData?.ticketBalance ?? null;
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -118,15 +104,8 @@ export default function CreateQuizPage() {
 
       const data = await response.json();
       toast.success('퀴즈가 성공적으로 생성되었습니다!');
-      // After successful generation, re-fetch ticket balance to reflect decrement
-      const updatedTicketRes = await fetch('/api/user/tickets', {
-        credentials: 'include',
-      });
-      if (updatedTicketRes.ok) {
-        const updatedTicketData = await updatedTicketRes.json();
-        setTicketBalance(updatedTicketData.ticketBalance);
-      }
-      router.refresh();
+      // After successful generation, trigger SWR revalidation for ticket balance
+      mutateTickets();
       router.push(`/quiz/${data.quizId}`);
 
     } catch (error: any) {
