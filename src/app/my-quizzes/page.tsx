@@ -223,7 +223,7 @@ export default function MyQuizzesPage() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
                         <div className="flex items-center gap-2">
-                          <Badge variant={quiz.isShared ? 'default' : 'secondary'}>
+                          <Badge variant={quiz.isShared ? 'default' : 'secondary'} className="min-w-[80px] text-center">
                             {quiz.isShared ? <Eye className="w-3 h-3 mr-1" /> : <EyeOff className="w-3 h-3 mr-1" />}
                             {quiz.isShared ? '공개' : '비공개'}
                           </Badge>
