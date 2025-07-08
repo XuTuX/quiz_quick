@@ -30,7 +30,7 @@ export default clerkMiddleware(
   },
   {
     afterSignInUrl: "/create-quiz",
-    afterSignUpUrl: "/create-quiz",
+    afterSignUpUrl: "/set-nickname",
   }
 );
 

@@ -19,7 +19,7 @@ interface SharedQuiz {
   totalLikes: number;
   quizData: any;
   questionCount: number;
-  creator: { clerkUserId: string };
+  creator: { clerkUserId: string; nickname: string | null };
 }
 
 function SearchBar({ initialQuery }: { initialQuery: string }) {
@@ -176,7 +176,7 @@ function SharedQuizzesContent() {
                       )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {quiz.creator.clerkUserId}
+                      {quiz.creator.nickname || quiz.creator.clerkUserId}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <Button variant="outline" size="sm" onClick={() => router.push(`/quiz/${quiz.id}`)} title="퀴즈 풀기">

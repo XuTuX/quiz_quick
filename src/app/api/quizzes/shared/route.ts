@@ -34,6 +34,7 @@ export async function GET(req: NextRequest) {
                 creator: {
                     select: {
                         clerkUserId: true,
+                        nickname: true,
                     },
                 },
             },

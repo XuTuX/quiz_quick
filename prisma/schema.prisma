@@ -38,6 +38,7 @@ model Like {
 model UserProfile {
   id            String   @id @default(cuid())
   clerkUserId   String   @unique // This will store the Clerk user ID
+  nickname      String? // Add nickname field, now optional and not unique
   ticketBalance Int      @default(0)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
