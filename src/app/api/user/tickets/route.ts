@@ -1,6 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 
 export async function GET() {
   try {
@@ -67,6 +68,7 @@ export async function POST(req: Request) {
       });
     }
 
+    revalidatePath("/user/profile");
     return NextResponse.json({ ticketBalance: userProfile.ticketBalance });
   } catch (error) {
     console.error("[API_USER_TICKETS_POST]", error);

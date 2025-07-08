@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { UploadCloud, File as FileIcon, XCircle, ArrowLeft, Wand2, Edit, Ticket } from 'lucide-react';
-import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import Link from 'next/link';
@@ -126,6 +126,7 @@ export default function CreateQuizPage() {
         const updatedTicketData = await updatedTicketRes.json();
         setTicketBalance(updatedTicketData.ticketBalance);
       }
+      router.refresh();
       router.push(`/quiz/${data.quizId}`);
 
     } catch (error: any) {
