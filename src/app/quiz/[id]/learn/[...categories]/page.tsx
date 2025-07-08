@@ -2,105 +2,107 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useParams } from 'next/navigation';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { QA, QuizData } from '@/lib/types';
 import { Home } from 'lucide-react';
 import Link from 'next/link';
+import { Button } from '@/components/ui/button';
 
 async function getQuizData(id: string): Promise<QuizData | null> {
     const res = await fetch(`/api/quizzes/${id}`);
-    if (!res.ok) {
-        return null;
-    }
-    const data = await res.json();
-    return data.quiz.quizData;
+    return res.ok ? (await res.json()).quiz.quizData : null;
 }
 
 export default function LearnPage() {
     const params = useParams() as { id: string; categories: string[] };
     const { id, categories } = params;
 
-    const cats = useMemo(() => {
-        return categories.map(decodeURIComponent);
-    }, [categories]);
+    // URL-encoded 카테고리 디코딩
+    const cats = useMemo(() => categories.map(decodeURIComponent), [categories]);
 
-    const [questions, setQuestions] = useState<QA[]>([]);
-    const [expandedQuestionIndex, setExpandedQuestionIndex] = useState<number | null>(null);
+    const [questionsByCategory, setQuestionsByCategory] = useState<Record<string, QA[]>>({});
 
     useEffect(() => {
-        if (typeof id === 'string') {
-            getQuizData(id).then(data => {
-                if (data) {
-                    let questionSet: QA[] = [];
-                    cats.forEach(cat => {
-                        if (data[cat]) {
-                            questionSet = questionSet.concat(data[cat]);
-                        }
-                    });
-                    setQuestions(questionSet);
-                }
+        if (typeof id !== 'string') return;
+
+        getQuizData(id).then((data) => {
+            if (!data) return;
+            const grouped: Record<string, QA[]> = {};
+            cats.forEach((cat) => {
+                if (data[cat]) grouped[cat] = [...data[cat]];
             });
-        }
+            setQuestionsByCategory(grouped);
+        });
     }, [id, cats]);
 
-    const toggleAnswer = (index: number) => {
-        setExpandedQuestionIndex(expandedQuestionIndex === index ? null : index);
-    };
+    const totalQuestions = Object.values(questionsByCategory).reduce(
+        (acc, q) => acc + q.length,
+        0,
+    );
 
-    if (questions.length === 0) {
+    /* ────────────────────────────────────────────────────────── */
+    /*                         RENDERING                          */
+    /* ────────────────────────────────────────────────────────── */
+
+    if (totalQuestions === 0) {
         return (
             <main className="flex min-h-screen flex-col items-center justify-center bg-gray-50 p-4">
-                <Card className="w-full max-w-2xl text-center">
-                    <CardHeader>
-                        <CardTitle>문제 로딩 중...</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <p>선택한 카테고리에 해당하는 문제가 없습니다.</p>
-                        <Link href={`/quiz/${id}`} className="mt-4 inline-block text-blue-600 hover:underline">
-                            <Home className="inline-block mr-2 h-4 w-4" />
-                            카테고리 선택으로 돌아가기
-                        </Link>
-                    </CardContent>
-                </Card>
+                <div className="w-full max-w-md text-center">
+                    <h2 className="mb-2 text-xl font-semibold">문제 로딩 중...</h2>
+                    <p className="text-gray-600">선택한 카테고리에 해당하는 문제가 없습니다.</p>
+                    <Link
+                        href={`/quiz/${id}`}
+                        className="mt-4 inline-flex items-center text-blue-600 hover:underline"
+                    >
+                        <Home className="mr-2 h-4 w-4" />
+                        카테고리 선택으로 돌아가기
+                    </Link>
+                </div>
             </main>
         );
     }
 
     return (
         <main className="min-h-screen bg-gray-50 p-4 md:p-8">
-            <Card className="w-full max-w-3xl mx-auto">
-                <CardHeader>
-                    <CardTitle className="text-2xl font-bold">학습하기: {cats.join(' · ')}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className="space-y-4">
-                        {questions.map((qa, index) => (
-                            <div
-                                key={index}
-                                className="border rounded-lg p-4 cursor-pointer hover:bg-gray-100 transition-colors"
-                                onClick={() => toggleAnswer(index)}
-                            >
-                                <p className="font-semibold text-lg">Q{index + 1}. {qa.question}</p>
-                                {expandedQuestionIndex === index && (
-                                    <div className="mt-2 p-3 bg-green-50 rounded-md border border-green-200">
-                                        <p className="font-bold text-green-700">정답:</p>
-                                        <p className="text-green-800">{qa.answer}</p>
+            <div className="mx-auto mb-6 w-full max-w-3xl">
+                {/* ───────────────── Header 버튼 ───────────────── */}
+                <Link href={`/quiz/${id}`}>
+                    <Button variant="outline" className="mb-6">
+                        <Home className="mr-2 h-4 w-4" />
+                        카테고리 선택으로 돌아가기
+                    </Button>
+                </Link>
+
+                <h1 className="mb-8 text-2xl font-bold">학습하기: {cats.join(' · ')}</h1>
+
+                {/* ──────────────── 카테고리별 질문 ──────────────── */}
+                {Object.entries(questionsByCategory).map(([catName, qaList]) => (
+                    <section key={catName} className="mb-10">
+                        <h3 className="mb-4 border-b pb-2 text-xl font-semibold">
+                            {catName} <span className="text-base text-gray-500">({qaList.length}문제)</span>
+                        </h3>
+
+                        <div className="space-y-4">
+                            {qaList.map((qa, idx) => (
+                                <details
+                                    key={idx}
+                                    className="rounded-lg border border-gray-200 bg-white shadow-sm transition-all open:bg-gray-50"
+                                >
+                                    <summary className="cursor-pointer select-none list-none p-4 text-sm font-medium leading-relaxed">
+                                        Q{idx + 1}. {qa.question}
+                                    </summary>
+
+                                    <div className="border-t p-4 text-sm leading-relaxed">
+                                        <p>
+                                            <span className="font-semibold text-green-700">정답&nbsp;:&nbsp;</span>
+                                            {qa.answer}
+                                        </p>
                                     </div>
-                                )}
-                            </div>
-                        ))}
-                    </div>
-                    <div className="mt-6 text-center">
-                        <Link href={`/quiz/${id}`}>
-                            <Button variant="outline">
-                                <Home className="mr-2 h-4 w-4" />
-                                카테고리 선택으로 돌아가기
-                            </Button>
-                        </Link>
-                    </div>
-                </CardContent>
-            </Card>
+                                </details>
+                            ))}
+                        </div>
+                    </section>
+                ))}
+            </div>
         </main>
     );
 }
