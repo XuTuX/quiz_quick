@@ -19,6 +19,7 @@ interface SharedQuiz {
   totalLikes: number;
   quizData: any;
   questionCount: number;
+  creator: { clerkUserId: string };
 }
 
 function SearchBar({ initialQuery }: { initialQuery: string }) {
@@ -136,6 +137,7 @@ function SharedQuizzesContent() {
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">문제 수</th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">좋아요</th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">해시태그</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">만든 사람</th>
                   <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">액션</th>
                 </tr>
               </thead>
@@ -172,6 +174,9 @@ function SharedQuizzesContent() {
                       ) : (
                         <span className="text-gray-400">없음</span>
                       )}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {quiz.creator.clerkUserId}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <Button variant="outline" size="sm" onClick={() => router.push(`/quiz/${quiz.id}`)} title="퀴즈 풀기">

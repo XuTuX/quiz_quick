@@ -30,6 +30,13 @@ export async function GET(req: NextRequest) {
 
         const sharedQuizzes = await prisma.quiz.findMany({
             where: whereClause,
+            include: {
+                creator: {
+                    select: {
+                        clerkUserId: true,
+                    },
+                },
+            },
         });
         return NextResponse.json({ quizzes: sharedQuizzes });
     } catch (error: any) {
