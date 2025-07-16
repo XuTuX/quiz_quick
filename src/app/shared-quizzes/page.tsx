@@ -7,7 +7,6 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from 'react-hot-toast';
 import { QuizData } from '@/lib/types';
 import { useSearchParams, useRouter } from 'next/navigation';
-
 import { Input } from '@/components/ui/input';
 import { Heart, MessageSquare, Search, Play } from 'lucide-react';
 
@@ -118,14 +117,14 @@ function SharedQuizzesContent() {
         quizzes.length === 0 ? (
           <div className="text-center py-16 border-2 border-dashed rounded-lg bg-white">
             <h2 className="text-xl font-semibold">{query ? `"${query}"에 대한 검색 결과가 없습니다.` : "검색어를 입력하여 공유된 퀴즈를 찾아보세요."}</h2>
-              <p className="text-gray-500 mt-2">{query ? "다른 키워드로 검색하거나, 직접 퀴즈를 만들어 공유해보세요!" : "제목이나 해시태그로 퀴즈를 검색할 수 있습니다."}</p>
-              <div className="mt-6 flex gap-4 justify-center">
-                {!query && (
-                  <Button asChild variant="secondary">
-                    <Link href="/create-quiz">퀴즈 만들러 가기</Link>
-                  </Button>
-                )}
-              </div>
+            <p className="text-gray-500 mt-2">{query ? "다른 키워드로 검색하거나, 직접 퀴즈를 만들어 공유해보세요!" : "제목이나 해시태그로 퀴즈를 검색할 수 있습니다."}</p>
+            <div className="mt-6 flex gap-4 justify-center">
+              {!query && (
+                <Button asChild variant="secondary">
+                  <Link href="/create-quiz">퀴즈 만들러 가기</Link>
+                </Button>
+              )}
+            </div>
           </div>
         ) : (
           <div className="overflow-x-auto bg-white rounded-lg shadow">
