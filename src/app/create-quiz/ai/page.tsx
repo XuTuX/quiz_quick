@@ -21,12 +21,11 @@ export default function CreateQuizPage() {
     const [errorMessage, setErrorMessage] = useState('');
     const [isDragOver, setIsDragOver] = useState(false);
 
+
+    const fetcher = (url: string) => fetch(url, { credentials: 'include' }).then(res => res.json());
     const { data: swrTicketData, mutate: mutateTickets } = useSWR(
         '/api/user/tickets', fetcher
     );
-
-    const fetcher = (url: string) => fetch(url, { credentials: 'include' }).then(res => res.json());
-
     const ticketBalance = swrTicketData?.ticketBalance ?? null;
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
